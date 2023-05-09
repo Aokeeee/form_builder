@@ -36,9 +36,8 @@
         >
           <Draggable
             :sort="false"
-            v-model="item.data"
-            item-key="value"
-            ghostClass="ghost"
+            :list="item.data"
+            item-key="icon"
             :group="{ name: 'people', pull: 'clone', put: false }"
             style="
               width: 100%;

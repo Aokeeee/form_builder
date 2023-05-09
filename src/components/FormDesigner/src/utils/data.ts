@@ -55,20 +55,20 @@ export const formItemsData: FormData[] = [
         icon: "grid",
         label: "栅格布局",
         component: "NGrid",
+        columns: [
+          {
+            span: 1,
+            list: [],
+          },
+          {
+            span: 1,
+            list: [],
+          },
+        ],
         componentPorps: {
           cols: 2,
           xGap: 12,
           yGap: 12,
-          columns: [
-            {
-              span: 1,
-              list: [],
-            },
-            {
-              span: 1,
-              list: [],
-            },
-          ],
         },
       },
     ],
@@ -84,16 +84,3 @@ export const formItemsData: FormData[] = [
     data: [],
   },
 ];
-
-export const resetColumns = () => {
-  formItemsData[1].data[0].componentPorps.columns = [
-    {
-      span: 1,
-      list: [],
-    },
-    {
-      span: 1,
-      list: [],
-    },
-  ];
-};

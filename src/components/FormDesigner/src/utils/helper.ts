@@ -1,1 +1,9 @@
-export const p = 0;
+import { FormComponent } from "../types";
+
+export const formComponentPorps = {
+  
+}
+
+export const getFormComponentPorps = (formComponent: FormComponent) => {
+
+};

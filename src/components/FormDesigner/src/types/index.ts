@@ -23,3 +23,8 @@ export interface FormData {
   title: string;
   data: FormItems[];
 }
+
+export interface FormComponentPorps {
+  component: FormComponent;
+  props: any[];
+}

@@ -1,9 +1,30 @@
 import { ref } from "vue";
 import { v4 } from "uuid";
-import { FormItems } from "../types";
+import { FormItems, FormComponent } from "../types";
+import { formItemsData } from "../utils/data";
 export function useFormDesigner() {
   const schema = ref<FormItems[]>([]);
   const currentData = ref<FormItems | undefined>(undefined);
+
+  // const resetDefalutValue = (
+  //   component: FormComponent,
+  //   index: number,
+  //   list?: FormItems[]
+  // ) => {
+  //   const arr = list && list.length ? list : schema.value;
+  //   const parentVal = formItemsData.find((item) =>
+  //     item.data.find((item) => item.component === component)
+  //   );
+  //   const defaultValue =
+  //     parentVal &&
+  //     parentVal.data.find((item) => item.component === component)
+  //       ?.componentProps;
+
+  //   if (defaultValue) {
+  //     // arr[index].componentProps = defaultValue;
+  //     console.log(arr[index].componentProps);
+  //   }
+  // };
 
   const handleAdd = (e: { newIndex: number; item: any }) => {
     const { newIndex } = e;
@@ -15,6 +36,8 @@ export function useFormDesigner() {
       key,
       id: `${schema.value[newIndex].icon}_${key}`,
     };
+    // resetDefalutValue(schema.value[newIndex].component, newIndex, schema.value);
+
     //处理栅格布局
     if (schema.value[newIndex].component === "NGrid") {
       schema.value[newIndex] = {
@@ -42,7 +65,6 @@ export function useFormDesigner() {
     index: string | number | symbol
   ) => {
     const { newIndex, oldIndex, item } = event;
-    console.log(newIndex, oldIndex, item.className);
     // 不允许栅格嵌套栅格
     if (item.className.includes("grid")) {
       item.tagName === "BUTTON" && row.columns[index].list.splice(newIndex, 1);
@@ -83,17 +105,36 @@ export function useFormDesigner() {
     const key = v4().replaceAll("-", "");
     const arr = list && list.length ? list : schema.value;
 
-    let copyData = {
+    let copyData: FormItems = {
       ...arr[index],
       key,
       id: `${arr[index].icon}_${key}`,
     };
+
+    //handle grid copy clear all childnode
+    if (arr[index].component === "NGrid") {
+      copyData = {
+        ...copyData,
+        //default columns
+        columns: [
+          {
+            span: 1,
+            list: [],
+          },
+          {
+            span: 1,
+            list: [],
+          },
+        ],
+      };
+    }
     arr.splice(index + 1, 0, copyData);
     currentData.value = copyData;
   };
 
   const handleClear = () => {
     schema.value = [];
+    currentData.value = undefined;
   };
   const handlePreview = () => {
     console.log(schema.value);

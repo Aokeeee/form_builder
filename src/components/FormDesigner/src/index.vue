@@ -32,7 +32,7 @@
               class="form-wrapper-list"
               :animation="200"
               item-key="key"
-              ghostClass="ghost"
+              ghostClass="form-ghost"
               handle=".drag-btn"
               :list="schema"
               :group="{ name: 'people' }"
@@ -62,7 +62,7 @@
                           <Draggable
                             class="gird-item-gi-list"
                             item-key="key"
-                            ghostClass="ghost"
+                            ghostClass="form-ghost"
                             handle=".drag-btn"
                             :animation="200"
                             :group="{ name: 'people' }"
@@ -174,7 +174,11 @@
                       @click="handleItemClick(element)"
                     >
                       <n-form-item :label="element.label">
-                        <component :is="element.component" />
+                        <component
+                          :is="element.component"
+                          v-bind="element.componentProps"
+                          v-model:value="element.componentProps.value"
+                        />
                       </n-form-item>
                       <div
                         class="drag-btn"
@@ -223,12 +227,12 @@
         </n-card>
       </n-layout-content>
     </n-layout>
-    <formSetting v-model:current-data="currentData" />
+    <formSetting :current-data="currentData" />
   </n-layout>
 </template>
 
 <script lang="ts">
-import { defineComponent, provide } from "vue";
+import { defineComponent } from "vue";
 import { formItemsData } from "./utils/data";
 import { formComponents, formSetting } from "./components";
 import { SvgIcon } from "@/components/SvgIcon";
@@ -251,7 +255,6 @@ export default defineComponent({
       handleItmeDelete,
     } = useFormDesigner();
 
-    provide("curretnData", currentData.value);
     return {
       schema,
       handleAdd,
@@ -262,7 +265,7 @@ export default defineComponent({
       handleItemCopy,
       handleItemClick,
       handleItmeDelete,
-      comlist: formItemsData,
+      comlist: JSON.parse(JSON.stringify(formItemsData)),
     };
   },
 });
@@ -273,7 +276,9 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   min-width: 1200px;
-  .ghost {
+  overflow: hidden;
+
+  .form-ghost {
     background: var(--n-color-target);
     border: 2px solid var(--n-color-target);
     outline-width: 0;
@@ -285,111 +290,108 @@ export default defineComponent({
     padding: 0;
     width: 100%;
   }
-}
-* {
-  box-sizing: border-box;
-}
-.form-toolbar {
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 41.96px;
-
-  .svg-icon {
-    margin: 0;
-    font-size: 16px;
-  }
-}
-.form-wrapper {
-  height: calc(100% - 42px);
-
-  .n-card {
-    min-height: calc(100vh - 64px);
-    position: relative;
-  }
-  &-list {
-    width: 100%;
-    min-height: calc(100vh - 80px);
-
-    .item-wrapper {
-      padding: 5px 25px;
-      box-sizing: border-box;
-      position: relative;
-      border: 1px dashed var(--n-color-target);
-      margin: 2px;
-      .grid-item {
-        border: 1px dashed var(--n-color-target);
-        .gird-item-gi-list {
-          min-height: 46px;
-        }
-      }
-      .drag-btn {
-        width: 20px;
-        height: 20px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        opacity: 0.6;
-        display: flex;
-        cursor: pointer;
-        align-items: center;
-        justify-content: center;
-        background-color: var(--n-color-target);
-        transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        .svg-icon {
-          font-size: 16px;
-          color: var(--n-color);
-        }
-        &:hover {
-          opacity: 1;
-        }
-      }
-      .action-bar {
-        display: flex;
-        align-items: center;
-        box-sizing: border-box;
-        position: absolute;
-        right: 0;
-        bottom: 0;
-
-        .delete-btn,
-        .copy-btn {
-          width: 20px;
-          height: 20px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 2px;
-          cursor: pointer;
-          background-color: var(--n-color-target);
-        }
-        &:hover {
-          opacity: 1;
-        }
-        .svg-icon {
-          font-size: 16px;
-          color: var(--n-color);
-        }
-      }
-    }
-    .active {
-      outline: 1px solid var(--n-color-target);
-      border: 2px solid var(--n-color-target);
-    }
-  }
-  &-empty {
-    width: 100%;
-    height: calc(100vh - 74px);
+  .form-toolbar {
+    padding: 0 20px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    position: absolute;
-    left: 0;
-    top: 0;
-    .n-text {
-      margin-bottom: 40px;
-      font-size: 18px;
+    justify-content: space-between;
+    height: 41.96px;
+
+    .svg-icon {
+      margin: 0;
+      font-size: 16px;
+    }
+  }
+  .form-wrapper {
+    height: calc(100% - 42px);
+
+    .n-card {
+      min-height: calc(100vh - 64px);
+      position: relative;
+    }
+    &-list {
+      width: 100%;
+      min-height: calc(100vh - 80px);
+
+      .item-wrapper {
+        padding: 5px 25px;
+        box-sizing: border-box;
+        position: relative;
+        border: 1px dashed var(--n-color-target);
+        margin: 2px;
+        .grid-item {
+          border: 1px dashed var(--n-color-target);
+          .gird-item-gi-list {
+            min-height: 46px;
+          }
+        }
+        .drag-btn {
+          width: 20px;
+          height: 20px;
+          position: absolute;
+          top: 0;
+          left: 0;
+          opacity: 0.6;
+          display: flex;
+          cursor: pointer;
+          align-items: center;
+          justify-content: center;
+          background-color: var(--n-color-target);
+          transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          .svg-icon {
+            font-size: 16px;
+            color: var(--n-color);
+          }
+          &:hover {
+            opacity: 1;
+          }
+        }
+        .action-bar {
+          display: flex;
+          align-items: center;
+          box-sizing: border-box;
+          position: absolute;
+          right: 0;
+          bottom: 0;
+
+          .delete-btn,
+          .copy-btn {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+            cursor: pointer;
+            background-color: var(--n-color-target);
+          }
+          &:hover {
+            opacity: 1;
+          }
+          .svg-icon {
+            font-size: 16px;
+            color: var(--n-color);
+          }
+        }
+      }
+      .active {
+        outline: 1px solid var(--n-color-target);
+        border: 2px solid var(--n-color-target);
+      }
+    }
+    &-empty {
+      width: 100%;
+      height: calc(100vh - 74px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      left: 0;
+      top: 0;
+      .n-text {
+        margin-bottom: 40px;
+        font-size: 18px;
+      }
     }
   }
 }

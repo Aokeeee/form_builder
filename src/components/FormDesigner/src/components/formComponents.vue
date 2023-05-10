@@ -29,7 +29,7 @@
         ]"
       >
         <n-collapse-item
-          v-for="(item, index) in list"
+          v-for="(item, index) in formItemsData"
           :key="item.type + '-' + index"
           :title="item.title"
           :name="item.type"
@@ -66,6 +66,7 @@ import { FormData } from "../types";
 import { SvgIcon } from "@/components/SvgIcon";
 import { PropType, defineComponent } from "vue";
 import Draggable from "vuedraggable/src/vuedraggable";
+import { formItemsData } from "../utils/data";
 export default defineComponent({
   name: "formComponents",
   props: {
@@ -75,7 +76,7 @@ export default defineComponent({
   components: { SvgIcon, Draggable },
   setup(props, { emit }) {
     return {
-      list: props.comlist ?? [],
+      formItemsData,
     };
   },
 });
@@ -84,6 +85,16 @@ export default defineComponent({
 <style lang="less" scoped>
 .components-content {
   height: calc(100% - 42px);
+  :deep(.n-collapse) {
+    .n-collapse-item__header-main {
+      justify-content: space-between;
+
+      font-weight: bold !important;
+    }
+    .n-collapse-item__content-inner {
+      padding: 16px 6px 0;
+    }
+  }
 }
 .components-toolbar {
   .svg-icon {
@@ -94,8 +105,5 @@ export default defineComponent({
 .n-button {
   justify-content: start;
   font-size: 13px;
-}
-:deep(.n-collapse-item__header-main) {
-  justify-content: space-between;
 }
 </style>

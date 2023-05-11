@@ -3,7 +3,7 @@
     <formComponents :comlist="comlist" />
     <n-layout>
       <n-layout-header bordered class="form-toolbar">
-        <n-space>其他功能</n-space>
+        <n-text>{{ formPorps.title }}</n-text>
         <n-space justify="end" align="center">
           <n-button text type="error" size="small" @click="handleClear">
             <template #icon>
@@ -27,7 +27,7 @@
         :native-scrollbar="false"
       >
         <n-card :bordered="false" :content-style="{ padding: '6px' }">
-          <n-form label-placement="left" :show-feedback="false">
+          <n-form v-bind="formPorps" :show-feedback="false">
             <Draggable
               class="form-wrapper-list"
               :animation="200"
@@ -49,9 +49,9 @@
                       <n-grid
                         v-if="element.key"
                         :key="element.key"
-                        :cols="element.componentPorps.cols"
-                        :x-gap="element.componentPorps.xGap"
-                        :y-gap="element.componentPorps.yGap"
+                        :cols="element.componentProps.cols"
+                        :x-gap="element.componentProps.xGap"
+                        :y-gap="element.componentProps.yGap"
                       >
                         <n-gi
                           class="grid-item"
@@ -84,7 +84,48 @@
                                   @click.stop="handleItemClick(element)"
                                 >
                                   <n-form-item :label="element.label">
-                                    <component :is="element.component" />
+                                    <n-radio-group
+                                      v-if="element.component === 'NRadio'"
+                                      v-bind="element.componentProps"
+                                      v-model:value="
+                                        element.componentProps.value
+                                      "
+                                    >
+                                      <n-radio
+                                        v-for="item in element.componentProps
+                                          .options"
+                                        :key="item.value"
+                                        :value="item.value"
+                                      >
+                                        {{ item.label }}
+                                      </n-radio>
+                                    </n-radio-group>
+
+                                    <n-checkbox-group
+                                      v-else-if="
+                                        element.component === 'NCheckBox'
+                                      "
+                                      v-bind="element.componentProps"
+                                      v-model:value="
+                                        element.componentProps.value
+                                      "
+                                    >
+                                      <n-checkbox
+                                        v-for="item in element.componentProps
+                                          .options"
+                                        :key="item.value"
+                                        :value="item.value"
+                                        :label="item.label"
+                                      />
+                                    </n-checkbox-group>
+                                    <component
+                                      v-else
+                                      :is="element.component"
+                                      v-bind="element.componentProps"
+                                      v-model:value="
+                                        element.componentProps.value
+                                      "
+                                    />
                                   </n-form-item>
                                   <div
                                     class="drag-btn"
@@ -174,7 +215,34 @@
                       @click="handleItemClick(element)"
                     >
                       <n-form-item :label="element.label">
+                        <n-radio-group
+                          v-if="element.component === 'NRadio'"
+                          v-bind="element.componentProps"
+                          v-model:value="element.componentProps.value"
+                        >
+                          <n-radio
+                            v-for="item in element.componentProps.options"
+                            :key="item.value"
+                            :value="item.value"
+                          >
+                            {{ item.label }}
+                          </n-radio>
+                        </n-radio-group>
+
+                        <n-checkbox-group
+                          v-else-if="element.component === 'NCheckBox'"
+                          v-bind="element.componentProps"
+                          v-model:value="element.componentProps.value"
+                        >
+                          <n-checkbox
+                            v-for="item in element.componentProps.options"
+                            :key="item.value"
+                            :value="item.value"
+                            :label="item.label"
+                          />
+                        </n-checkbox-group>
                         <component
+                          v-else
                           :is="element.component"
                           v-bind="element.componentProps"
                           v-model:value="element.componentProps.value"
@@ -227,24 +295,25 @@
         </n-card>
       </n-layout-content>
     </n-layout>
-    <formSetting :current-data="currentData" />
+    <formSetting :current-data="currentData" :form-porps="formPorps" />
   </n-layout>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
 import { formItemsData } from "./utils/data";
 import { formComponents, formSetting } from "./components";
 import { SvgIcon } from "@/components/SvgIcon";
 import Draggable from "vuedraggable/src/vuedraggable";
 import { useFormDesigner } from "./hooks/useFormDesigner";
-
+import { FormItems } from "./types";
 export default defineComponent({
   name: "FormDesigner",
   components: { formComponents, formSetting, SvgIcon, Draggable },
   setup(props, { emit }) {
     const {
       schema,
+      formPorps,
       handleAdd,
       handleGiAdd,
       currentData,
@@ -254,9 +323,13 @@ export default defineComponent({
       handleItemClick,
       handleItmeDelete,
     } = useFormDesigner();
-
+    const getComponentProps = (component: FormItems) => {
+      const componentProps = computed(() => component.componentProps ?? {});
+      return componentProps;
+    };
     return {
       schema,
+      formPorps,
       handleAdd,
       handleGiAdd,
       currentData,
@@ -265,6 +338,7 @@ export default defineComponent({
       handleItemCopy,
       handleItemClick,
       handleItmeDelete,
+      getComponentProps,
       comlist: JSON.parse(JSON.stringify(formItemsData)),
     };
   },
@@ -314,7 +388,7 @@ export default defineComponent({
       min-height: calc(100vh - 80px);
 
       .item-wrapper {
-        padding: 5px 25px;
+        padding: 5px 60px 5px 25px;
         box-sizing: border-box;
         position: relative;
         border: 1px dashed var(--n-color-target);

@@ -1,5 +1,4 @@
 import { FormData } from "../types";
-
 export const formItemsData: FormData[] = [
   {
     type: "BasicField",
@@ -9,67 +8,41 @@ export const formItemsData: FormData[] = [
         icon: "input",
         label: "单行输入",
         component: "NInput",
-        componentProps: {
-          value: "",
-          clearable: true,
-        },
       },
       {
         icon: "textarea",
         label: "多行输入",
         component: "NInput",
-        componentProps: {
-          value: "",
-          clearable: true,
-        },
       },
       {
         icon: "inputnumber",
         label: "数字输入",
         component: "NInputNumber",
-        componentProps: {
-          value: null,
-        },
       },
       {
         icon: "radio",
         label: "单选项",
         component: "NRadio",
-        componentProps: {
-          value: null,
-        },
       },
       {
         icon: "checkbox",
         label: "多选项",
         component: "NCheckBox",
-        componentProps: {
-          value: null,
-        },
       },
       {
         icon: "select",
         label: "下拉选项",
         component: "NSelect",
-        componentProps: {
-          value: null,
-        },
       },
       {
         icon: "time",
         label: "时间选择器",
         component: "NTimePicker",
-        componentProps: {
-          value: null,
-        },
       },
       {
         icon: "date",
         label: "日期选择器",
         component: "NDatePicker",
-        componentProps: {
-          value: null,
-        },
       },
     ],
   },
@@ -81,21 +54,6 @@ export const formItemsData: FormData[] = [
         icon: "grid",
         label: "栅格布局",
         component: "NGrid",
-        columns: [
-          {
-            span: 1,
-            list: [],
-          },
-          {
-            span: 1,
-            list: [],
-          },
-        ],
-        componentPorps: {
-          cols: 2,
-          xGap: 12,
-          yGap: 12,
-        },
       },
     ],
   },
@@ -134,4 +92,41 @@ export const formItemPorps = [
   },
 ];
 
-export const schema = [];
+export const sizeData = [
+  {
+    value: "small",
+    label: "small",
+  },
+  {
+    value: "medium",
+    label: "medium",
+  },
+  {
+    value: "large",
+    label: "large",
+  },
+];
+export const labelPlacementData = [
+  {
+    value: "left",
+    label: "左侧",
+  },
+  {
+    value: "top",
+    label: "顶部",
+  },
+];
+export const labelAlignData = [
+  {
+    value: "left",
+    label: "居左",
+  },
+  {
+    value: "center",
+    label: "居中",
+  },
+  {
+    value: "right",
+    label: "居右",
+  },
+];

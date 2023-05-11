@@ -1,61 +1,47 @@
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import { v4 } from "uuid";
-import { FormItems, FormComponent } from "../types";
-import { formItemsData } from "../utils/data";
+import { FormItems, GenFormProps } from "../types";
+import { genFormComponentPorps } from "../utils/helper";
 export function useFormDesigner() {
   const schema = ref<FormItems[]>([]);
   const currentData = ref<FormItems | undefined>(undefined);
-
-  // const resetDefalutValue = (
-  //   component: FormComponent,
-  //   index: number,
-  //   list?: FormItems[]
-  // ) => {
-  //   const arr = list && list.length ? list : schema.value;
-  //   const parentVal = formItemsData.find((item) =>
-  //     item.data.find((item) => item.component === component)
-  //   );
-  //   const defaultValue =
-  //     parentVal &&
-  //     parentVal.data.find((item) => item.component === component)
-  //       ?.componentProps;
-
-  //   if (defaultValue) {
-  //     // arr[index].componentProps = defaultValue;
-  //     console.log(arr[index].componentProps);
-  //   }
-  // };
-
+  const formPorps = reactive<GenFormProps>({
+    title: "默认标题",
+    size: "medium",
+    labelPlacement: "left",
+    labelAlign: "center",
+    labelWidth: 85,
+  });
   const handleAdd = (e: { newIndex: number; item: any }) => {
     const { newIndex } = e;
     const key = v4().replaceAll("-", "");
-
     //每次拖拽给当前组件数据赋唯一key、id
     schema.value[newIndex] = {
       ...schema.value[newIndex],
       key,
       id: `${schema.value[newIndex].icon}_${key}`,
+      componentProps: {
+        ...genFormComponentPorps(schema.value[newIndex]),
+      },
+      //处理栅格布局
+      columns:
+        schema.value[newIndex].component === "NGrid"
+          ? [
+              {
+                span: 1,
+                list: [],
+              },
+              {
+                span: 1,
+                list: [],
+              },
+            ]
+          : null,
+      rules: schema.value[newIndex].component === "NGrid" ? null : [],
     };
-    // resetDefalutValue(schema.value[newIndex].component, newIndex, schema.value);
 
-    //处理栅格布局
-    if (schema.value[newIndex].component === "NGrid") {
-      schema.value[newIndex] = {
-        ...schema.value[newIndex],
-        //clear columns
-        columns: [
-          {
-            span: 1,
-            list: [],
-          },
-          {
-            span: 1,
-            list: [],
-          },
-        ],
-      };
-    }
     currentData.value = schema.value[newIndex];
+
     console.log("当前行数据====>", schema.value[newIndex]);
   };
 
@@ -78,6 +64,9 @@ export function useFormDesigner() {
         ...row.columns[index].list[newIndex],
         key,
         id: `${row.columns[index].list[newIndex].icon}_${key}`,
+        componentProps: {
+          ...genFormComponentPorps(row.columns[index].list[newIndex]),
+        },
       };
       currentData.value = row.columns[index].list[newIndex];
       console.log("栅格数据====>", row.columns[index]);
@@ -104,30 +93,28 @@ export function useFormDesigner() {
   const handleItemCopy = (index: number, list?: FormItems[]) => {
     const key = v4().replaceAll("-", "");
     const arr = list && list.length ? list : schema.value;
-
-    let copyData: FormItems = {
+    const copyData: FormItems = {
       ...arr[index],
       key,
       id: `${arr[index].icon}_${key}`,
+      componentProps: {
+        ...genFormComponentPorps(arr[index]),
+      },
+      //处理栅格布局
+      columns:
+        arr[index].component === "NGrid"
+          ? [
+              {
+                span: 1,
+                list: [],
+              },
+              {
+                span: 1,
+                list: [],
+              },
+            ]
+          : null,
     };
-
-    //handle grid copy clear all childnode
-    if (arr[index].component === "NGrid") {
-      copyData = {
-        ...copyData,
-        //default columns
-        columns: [
-          {
-            span: 1,
-            list: [],
-          },
-          {
-            span: 1,
-            list: [],
-          },
-        ],
-      };
-    }
     arr.splice(index + 1, 0, copyData);
     currentData.value = copyData;
   };
@@ -142,6 +129,7 @@ export function useFormDesigner() {
 
   return {
     schema,
+    formPorps,
     handleAdd,
     handleGiAdd,
     handleClear,

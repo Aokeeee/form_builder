@@ -1,3 +1,5 @@
+import type { FormProps } from "naive-ui";
+
 export type FormComponent =
   | "NInput"
   | "NSelect"
@@ -27,4 +29,8 @@ export interface FormData {
 export interface FormComponentPorps {
   component: FormComponent;
   props: any[];
+}
+
+export interface GenFormProps extends FormProps {
+  title: string;
 }

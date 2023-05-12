@@ -33,4 +33,5 @@ export interface FormComponentPorps {
 
 export interface GenFormProps extends FormProps {
   title: string;
+  width: number;
 }

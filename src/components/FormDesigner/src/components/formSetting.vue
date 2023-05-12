@@ -58,9 +58,124 @@
                 :span="2"
                 :label-style="{ fontSize: '13px' }"
                 label="默认值"
+                v-if="getCurrentData.component !== 'NGrid'"
               >
-                <n-input v-model:value="getCurrentData.componentProps.value" />
+                <component
+                  v-if="
+                    [
+                      'NSelect',
+                      'NInput',
+                      'NInputNumber',
+                      'NDataPicker',
+                      'NTimePicker',
+                    ].includes(getCurrentData.component)
+                  "
+                  :is="getCurrentData.component"
+                  v-bind="getCurrentData.componentProps"
+                  v-model:value="getCurrentData.componentProps.value"
+                />
+                <n-select
+                  multiple
+                  :show="false"
+                  :show-arrow="false"
+                  v-model:value="getCurrentData.componentProps.value"
+                  v-else-if="getCurrentData.component === 'NCheckBox'"
+                />
+                <n-input
+                  v-else
+                  v-model:value="getCurrentData.componentProps.value"
+                />
               </n-form-item-gi>
+
+              <n-form-item-gi
+                :span="2"
+                :label-style="{ fontSize: '13px' }"
+                v-if="getCurrentData.component === 'NGrid'"
+              >
+                <div style="width: 100%" class="select-componet-toolbar">
+                  <n-divider style="margin: 0 0 12px 0; font-size: 13px">
+                    栅格配置
+                  </n-divider>
+                  <n-form-item
+                    label="栅格间隔"
+                    :label-style="{ fontSize: '13px' }"
+                    style="margin-bottom: 12px"
+                  >
+                    <n-input-number
+                      :min="0"
+                      placeholder="x"
+                      v-model:value="getCurrentData.componentProps.xGap"
+                    />
+                    <n-divider vertical />
+                    <n-input-number
+                      :min="0"
+                      placeholder="y"
+                      v-model:value="getCurrentData.componentProps.yGap"
+                    />
+                  </n-form-item>
+                  <n-divider style="margin: 0 0 12px 0; font-size: 13px">
+                    当前栅格列
+                  </n-divider>
+                  <Draggable
+                    item-key="value"
+                    :animation="200"
+                    handle=".select-componet-toolbar-item-drag-btn"
+                    :list="getCurrentData.columns"
+                  >
+                    <template #item="{ element, index }">
+                      <transition-group
+                        name="fade"
+                        tag="div"
+                        class="select-componet-toolbar-item"
+                      >
+                        <n-space :wrap="false" :key="index" align="center">
+                          <div class="select-componet-toolbar-item-drag-btn">
+                            <SvgIcon name="drag2" />
+                          </div>
+                          <div style="width: 70px; font-size: 13px">
+                            <n-ellipsis style="max-width: 70px">
+                              栅格宽度{{ index + 1 }}
+                            </n-ellipsis>
+                          </div>
+                          <n-input-number
+                            v-model:value="element.span"
+                            :min="1"
+                            :max="24"
+                          />
+
+                          <div class="select-componet-toolbar-item-del-btn">
+                            <n-button
+                              text
+                              type="error"
+                              :disabled="getCurrentData.columns.length === 1"
+                              @click="getCurrentData.columns.splice(index, 1)"
+                            >
+                              <template #icon>
+                                <SvgIcon name="delete" />
+                              </template>
+                            </n-button>
+                          </div>
+                        </n-space>
+                      </transition-group>
+                    </template>
+                  </Draggable>
+                  <div class="select-componet-toolbar-actions">
+                    <n-button
+                      text
+                      type="info"
+                      @click="
+                        getCurrentData.columns.push({
+                          span: 12,
+                          list: [],
+                        })
+                      "
+                    >
+                      增加选项
+                    </n-button>
+                  </div>
+                </div>
+              </n-form-item-gi>
+
               <n-form-item-gi
                 v-if="
                   !['NText', 'NRate', 'NGrid', 'NSlider'].includes(
@@ -73,6 +188,17 @@
               >
                 <n-switch
                   v-model:value="getCurrentData.componentProps.disabled"
+                />
+              </n-form-item-gi>
+              <n-form-item-gi
+                v-if="getCurrentData.component === 'NSelect'"
+                :span="2"
+                label="是否多选"
+                :label-style="{ fontSize: '13px' }"
+              >
+                <n-switch
+                  v-model:value="getCurrentData.componentProps.multiple"
+                  @update-value="getCurrentData.componentProps.value = null"
                 />
               </n-form-item-gi>
               <n-form-item-gi
@@ -104,12 +230,14 @@
                 "
               >
                 <div style="width: 100%" class="select-componet-toolbar">
-                  <n-divider style="margin: 0 0 5px 0"> 选项设置 </n-divider>
+                  <n-divider style="margin: 0 0 8px 0; font-size: 13px">
+                    选项设置
+                  </n-divider>
                   <Draggable
                     item-key="value"
                     :animation="200"
                     ghostClass="ghost"
-                    handle=".item-drag-btn"
+                    handle=".select-componet-toolbar-item-drag-btn"
                     :list="getCurrentData.componentProps.options"
                   >
                     <template #item="{ element, index }">
@@ -118,28 +246,168 @@
                         tag="div"
                         class="select-componet-toolbar-item"
                       >
-                        <n-grid :cols="9" x-gap="6" :key="element.value">
-                          <n-gi :span="1"><n-checkbox></n-checkbox></n-gi>
-                          <n-gi :span="3"> <n-input /></n-gi>
-                          <n-gi :span="3"> <n-input /></n-gi>
-                          <n-gi :span="1">
-                            <n-button strong secondary circle type="error">
-                              <template #icon>
-                                <SvgIcon name="delete" />
-                              </template>
-                            </n-button>
-                          </n-gi>
-                          <n-gi :span="1">
-                            <n-button strong secondary circle type="warning">
-                              <template #icon>
-                                <SvgIcon name="disabled" />
-                              </template>
-                            </n-button>
-                          </n-gi>
-                        </n-grid>
+                        <template
+                          v-if="
+                            getCurrentData.component === 'NCheckBox' ||
+                            (getCurrentData.component === 'NSelect' &&
+                              getCurrentData.componentProps.multiple)
+                          "
+                          :key="element.value"
+                        >
+                          <n-checkbox-group
+                            v-model:value="getCurrentData.componentProps.value"
+                          >
+                            <n-space :wrap="false">
+                              <div
+                                class="select-componet-toolbar-item-drag-btn"
+                              >
+                                <SvgIcon name="drag2" />
+                              </div>
+                              <div
+                                class="select-componet-toolbar-item-selectcom"
+                              >
+                                <n-checkbox
+                                  size="large"
+                                  :value="element.value"
+                                  :disabled="element.disabled"
+                                />
+                              </div>
+                              <n-input
+                                size="small"
+                                v-model:value="element.label"
+                              />
+                              <n-input
+                                size="small"
+                                v-model:value="element.value"
+                              />
+                              <div class="select-componet-toolbar-item-del-btn">
+                                <n-button
+                                  text
+                                  type="error"
+                                  :disabled="
+                                    getCurrentData.componentProps.options
+                                      .length === 1
+                                  "
+                                  @click="
+                                    getCurrentData.componentProps.options.splice(
+                                      index,
+                                      1
+                                    )
+                                  "
+                                >
+                                  <template #icon>
+                                    <SvgIcon name="delete" />
+                                  </template>
+                                </n-button>
+                              </div>
+                              <div class="select-componet-toolbar-item-dis-btn">
+                                <n-button
+                                  text
+                                  type="warning"
+                                  @click="element.disabled = !element.disabled"
+                                >
+                                  <template #icon>
+                                    <SvgIcon name="disabled" />
+                                  </template>
+                                </n-button>
+                              </div>
+                            </n-space>
+                          </n-checkbox-group>
+                        </template>
+                        <template v-else>
+                          <n-radio-group
+                            :key="element.value"
+                            v-model:value="getCurrentData.componentProps.value"
+                            name="selectitemradiogroup"
+                          >
+                            <n-space :wrap="false">
+                              <div
+                                class="select-componet-toolbar-item-drag-btn"
+                              >
+                                <SvgIcon name="drag2" />
+                              </div>
+                              <div
+                                class="select-componet-toolbar-item-selectcom"
+                              >
+                                <n-radio
+                                  size="large"
+                                  :key="element.value"
+                                  v-model:value="element.value"
+                                  :disabled="element.disabled"
+                                />
+                              </div>
+                              <n-input
+                                size="small"
+                                v-model:value="element.label"
+                              />
+                              <n-input
+                                size="small"
+                                v-model:value="element.value"
+                              />
+                              <div class="select-componet-toolbar-item-del-btn">
+                                <n-button
+                                  text
+                                  type="error"
+                                  :disabled="
+                                    getCurrentData.componentProps.options
+                                      .length === 1
+                                  "
+                                  @click="
+                                    getCurrentData.componentProps.options.splice(
+                                      index,
+                                      1
+                                    )
+                                  "
+                                >
+                                  <template #icon>
+                                    <SvgIcon name="delete" />
+                                  </template>
+                                </n-button>
+                              </div>
+                              <div class="select-componet-toolbar-item-dis-btn">
+                                <n-button
+                                  text
+                                  type="warning"
+                                  @click="element.disabled = !element.disabled"
+                                >
+                                  <template #icon>
+                                    <SvgIcon name="disabled" />
+                                  </template>
+                                </n-button>
+                              </div>
+                            </n-space>
+                          </n-radio-group>
+                        </template>
                       </transition-group>
                     </template>
                   </Draggable>
+                  <div class="select-componet-toolbar-actions">
+                    <n-space>
+                      <n-button
+                        text
+                        type="info"
+                        @click="
+                          getCurrentData.componentProps.options.push({
+                            label: `${getCurrentData.icon}${
+                              getCurrentData.componentProps.options.length + 1
+                            }`,
+                            value: `${getCurrentData.icon}${
+                              getCurrentData.componentProps.options.length + 1
+                            }`,
+                          })
+                        "
+                      >
+                        增加选项
+                      </n-button>
+                      <n-button
+                        text
+                        type="info"
+                        @click="getCurrentData.componentProps.value = null"
+                      >
+                        重置选中项
+                      </n-button>
+                    </n-space>
+                  </div>
                 </div>
               </n-form-item-gi>
               <!-- <n-form-item-gi> </n-form-item-gi> -->
@@ -159,6 +427,17 @@
                 label="表单标题"
               >
                 <n-input v-model:value="getFormPorps.title" />
+              </n-form-item-gi>
+              <n-form-item-gi
+                :span="2"
+                :label-style="{ fontSize: '13px' }"
+                label="表单宽度"
+              >
+                <n-input-number
+                  v-model:value="getFormPorps.width"
+                  max="1200"
+                  min="500"
+                />
               </n-form-item-gi>
               <n-form-item-gi
                 :span="2"
@@ -250,6 +529,7 @@ import { SvgIcon } from "@/components/SvgIcon";
 import { FormItems, GenFormProps } from "../types";
 import Draggable from "vuedraggable/src/vuedraggable";
 import { ref, PropType, computed, defineComponent, watchEffect } from "vue";
+import { emit } from "process";
 
 export default defineComponent({
   name: "formSetting",
@@ -258,10 +538,15 @@ export default defineComponent({
     currentData: Object as PropType<FormItems>,
     formPorps: Object as PropType<GenFormProps>,
   },
-  setup(props) {
+  emits: ["update:currentData"],
+  setup(props, { emit }) {
     const tabsVal = ref("components_setting");
     const getFormPorps = computed(() => props.formPorps ?? undefined);
     const getCurrentData = computed(() => props.currentData ?? undefined);
+    const count = ref(0);
+    const handleAddSelectItem = () => {};
+    const handleResetSelectDefaultValue = () => {};
+    const handleDeleteSelectItem = (options: any[], index: number) => {};
 
     watchEffect(() => {
       if (
@@ -275,13 +560,16 @@ export default defineComponent({
     });
 
     return {
+      count,
       tabsVal,
       sizeData,
       getFormPorps,
       getCurrentData,
       labelAlignData,
       labelPlacementData,
-
+      handleAddSelectItem,
+      handleDeleteSelectItem,
+      handleResetSelectDefaultValue,
       propsList: formItemPorps,
     };
   },
@@ -292,44 +580,86 @@ export default defineComponent({
 .props-toolbar,
 .props-wrapper-content {
   border-left: 1px solid var(--n-border-color);
+
   .svg-icon {
     font-size: 17px;
     margin-right: 5px;
   }
 }
+
 .props-wrapper {
   &-content {
     height: calc(100% - 42px);
     width: 100%;
     overflow: hidden;
+
     .svg-icon {
       font-size: 16px;
       margin: 0;
     }
+
     :deep(.n-collapse) {
       .n-collapse-item__header-main {
         justify-content: space-between;
         font-weight: bold !important;
       }
+
       .n-collapse-item__content-inner {
         padding: 16px 6px 0;
+
         .handle-wrapper {
           display: flex;
           align-items: center;
+
           .n-button {
             margin-left: 40px;
           }
         }
         .select-componet-toolbar {
+          width: 100%;
+
           &-item {
             &:not(:last-child) {
               margin-bottom: 6px;
             }
+
+            &-selectcom {
+              width: 100%;
+              height: 100%;
+              display: flex;
+              align-items: center;
+              justify-content: start;
+            }
+
+            &-drag-btn,
+            &-del-btn,
+            &-dis-btn {
+              height: 100%;
+              display: flex;
+              cursor: pointer;
+              align-items: center;
+              justify-content: start;
+
+              .svg-icon {
+                font-size: 18px;
+              }
+            }
+            &-drag-btn {
+              cursor: move;
+            }
+          }
+
+          &-actions {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 8px;
           }
         }
+
         .n-radio-button {
           padding: 0 8px;
         }
+
         .n-radio-group .n-radio-button.n-radio-button--checked {
           background: var(--n-button-text-color-active);
           color: var(--n-color);

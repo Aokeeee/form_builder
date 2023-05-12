@@ -36,18 +36,29 @@ export const genFormComponentPorps = (form: FormItems) => {
           value: `${formComponentType}2`,
           disabled: false,
         },
+        {
+          label: `${formComponentType}3`,
+          value: `${formComponentType}3`,
+          disabled: false,
+        },
       ],
       ...entryComponentProps,
-      value: formComponentType === "checkbox" ? [] : null,
+      value: null,
     };
   }
 
   switch (formComponent) {
     case "NGrid":
       componentProps = {
-        cols: 2,
+        cols: 24,
         xGap: 12,
         yGap: 12,
+      };
+      break;
+    case "NSelect":
+      componentProps = {
+        ...componentProps,
+        multiple: false,
       };
       break;
 

@@ -96,6 +96,7 @@
                                           .options"
                                         :key="item.value"
                                         :value="item.value"
+                                        :disabled="item.disabled"
                                       >
                                         {{ item.label }}
                                       </n-radio>
@@ -116,8 +117,10 @@
                                         :key="item.value"
                                         :value="item.value"
                                         :label="item.label"
+                                        :disabled="item.disabled"
                                       />
                                     </n-checkbox-group>
+
                                     <component
                                       v-else
                                       :is="element.component"
@@ -224,6 +227,7 @@
                             v-for="item in element.componentProps.options"
                             :key="item.value"
                             :value="item.value"
+                            :disabled="item.disabled"
                           >
                             {{ item.label }}
                           </n-radio>
@@ -239,6 +243,7 @@
                             :key="item.value"
                             :value="item.value"
                             :label="item.label"
+                            :disabled="item.disabled"
                           />
                         </n-checkbox-group>
                         <component
@@ -295,7 +300,7 @@
         </n-card>
       </n-layout-content>
     </n-layout>
-    <formSetting :current-data="currentData" :form-porps="formPorps" />
+    <formSetting v-model:current-data="currentData" :form-porps="formPorps" />
   </n-layout>
 </template>
 

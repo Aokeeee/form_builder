@@ -7,6 +7,7 @@ export function useFormDesigner() {
   const currentData = ref<FormItems | undefined>(undefined);
   const formPorps = reactive<GenFormProps>({
     title: "默认标题",
+    width: 500,
     size: "medium",
     labelPlacement: "left",
     labelAlign: "center",
@@ -28,11 +29,11 @@ export function useFormDesigner() {
         schema.value[newIndex].component === "NGrid"
           ? [
               {
-                span: 1,
+                span: 12,
                 list: [],
               },
               {
-                span: 1,
+                span: 12,
                 list: [],
               },
             ]
@@ -105,11 +106,11 @@ export function useFormDesigner() {
         arr[index].component === "NGrid"
           ? [
               {
-                span: 1,
+                span: 12,
                 list: [],
               },
               {
-                span: 1,
+                span: 12,
                 list: [],
               },
             ]

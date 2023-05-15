@@ -1,348 +1,391 @@
 <template>
-  <n-layout has-sider class="gen-wrapper">
-    <formComponents :comlist="comlist" />
-    <n-layout>
-      <n-layout-header bordered class="form-toolbar">
-        <n-text>{{ formPorps.title }}</n-text>
-        <n-space justify="end" align="center">
-          <n-button text type="error" size="small" @click="handleClear">
-            <template #icon>
-              <SvgIcon name="delete" />
-            </template>
-            清空
-          </n-button>
-          <n-button text type="info" size="small" @click="handlePreview">
-            <template #icon>
-              <SvgIcon name="eye" />
-            </template>
-            预览
-          </n-button>
-          <n-button text type="info" size="small"> 导出JSON </n-button>
-        </n-space>
-      </n-layout-header>
-      <n-layout-content
-        embedded
-        class="form-wrapper"
-        :content-style="{ padding: '10px' }"
-        :native-scrollbar="false"
-      >
-        <n-card :bordered="false" :content-style="{ padding: '6px' }">
-          <n-form v-bind="formPorps" :show-feedback="false">
-            <Draggable
-              class="form-wrapper-list"
-              :animation="200"
-              item-key="key"
-              ghostClass="form-ghost"
-              handle=".drag-btn"
-              :list="schema"
-              :group="{ name: 'people' }"
-              @add="handleAdd"
+  <div>
+    <n-layout has-sider class="gen-wrapper">
+      <formComponents :comlist="comlist" />
+      <n-layout>
+        <n-layout-header bordered class="form-toolbar">
+          <n-text>{{ formProps.title }}</n-text>
+          <n-space justify="end" align="center">
+            <n-button
+              text
+              type="error"
+              size="small"
+              @click="handleClear"
+              :disabled="!schema.length"
             >
-              <template #item="{ element, index }">
-                <transition-group name="fade" tag="div">
-                  <template v-if="element.component === 'NGrid'">
-                    <div
-                      class="item-wrapper"
-                      :class="{ active: currentData?.key === element.key }"
-                      @click="handleItemClick(element)"
-                    >
-                      <n-grid
+              <template #icon>
+                <SvgIcon name="delete" />
+              </template>
+              清空
+            </n-button>
+            <n-button
+              text
+              type="info"
+              size="small"
+              @click="handlePreview"
+              :disabled="!schema.length"
+            >
+              <template #icon>
+                <SvgIcon name="eye" />
+              </template>
+              预览
+            </n-button>
+            <n-button text type="info" size="small" @click="handleExportJson">
+              导出JSON
+            </n-button>
+          </n-space>
+        </n-layout-header>
+        <n-layout-content
+          embedded
+          class="form-wrapper"
+          :content-style="{ padding: '10px' }"
+          :native-scrollbar="false"
+        >
+          <n-card :bordered="false" :content-style="{ padding: '6px' }">
+            <n-form v-bind="formProps" :show-feedback="false">
+              <Draggable
+                class="form-wrapper-list"
+                :animation="200"
+                item-key="key"
+                ghostClass="form-ghost"
+                handle=".drag-btn"
+                :list="schema"
+                :group="{ name: 'people' }"
+                @add="handleAdd"
+              >
+                <template #item="{ element, index }">
+                  <transition-group name="fade" tag="div">
+                    <template v-if="element.component === 'NGrid'">
+                      <div
+                        class="item-wrapper"
+                        :class="{ active: currentData?.key === element.key }"
+                        @click="handleItemClick(element)"
+                      >
+                        <n-grid
+                          v-if="element.key"
+                          :key="element.key"
+                          :cols="element.componentProps.cols"
+                          :x-gap="element.componentProps.xGap"
+                          :y-gap="element.componentProps.yGap"
+                        >
+                          <n-gi
+                            class="grid-item"
+                            v-for="(gi, giIndex) in element.columns"
+                            :key="giIndex"
+                            :span="gi.span"
+                          >
+                            <Draggable
+                              class="gird-item-gi-list"
+                              item-key="key"
+                              ghostClass="form-ghost"
+                              handle=".drag-btn"
+                              :animation="200"
+                              :group="{ name: 'people' }"
+                              :no-transition-on-drag="true"
+                              :list="gi.list"
+                              @add="handleGiAdd($event, element, giIndex)"
+                            >
+                              <template #item="{ element, index }">
+                                <transition-group name="fade" tag="div">
+                                  <div
+                                    v-if="
+                                      element.key &&
+                                      element.component != 'NGrid'
+                                    "
+                                    :key="element.key"
+                                    class="item-wrapper"
+                                    :class="{
+                                      active: currentData?.key === element.key,
+                                    }"
+                                    @click.stop="handleItemClick(element)"
+                                  >
+                                    <n-form-item :label="element.label">
+                                      <n-radio-group
+                                        v-if="element.component === 'NRadio'"
+                                        v-bind="element.componentProps"
+                                        v-model:value="
+                                          element.componentProps.value
+                                        "
+                                      >
+                                        <n-radio
+                                          v-for="item in element.componentProps
+                                            .options"
+                                          :key="item.value"
+                                          :value="item.value"
+                                          :disabled="item.disabled"
+                                        >
+                                          {{ item.label }}
+                                        </n-radio>
+                                      </n-radio-group>
+
+                                      <n-checkbox-group
+                                        v-else-if="
+                                          element.component === 'NCheckBox'
+                                        "
+                                        v-bind="element.componentProps"
+                                        v-model:value="
+                                          element.componentProps.value
+                                        "
+                                      >
+                                        <n-checkbox
+                                          v-for="item in element.componentProps
+                                            .options"
+                                          :key="item.value"
+                                          :value="item.value"
+                                          :label="item.label"
+                                          :disabled="item.disabled"
+                                        />
+                                      </n-checkbox-group>
+
+                                      <component
+                                        v-else
+                                        :is="element.component"
+                                        v-bind="element.componentProps"
+                                        v-model:value="
+                                          element.componentProps.value
+                                        "
+                                      />
+                                    </n-form-item>
+                                    <div
+                                      class="drag-btn"
+                                      v-if="currentData?.key === element.key"
+                                    >
+                                      <SvgIcon name="drag" />
+                                    </div>
+                                    <div
+                                      class="action-bar"
+                                      v-if="currentData?.key === element.key"
+                                    >
+                                      <n-tooltip trigger="hover">
+                                        <template #trigger>
+                                          <div
+                                            class="copy-btn"
+                                            @click.stop="
+                                              handleItemCopy(index, gi.list)
+                                            "
+                                          >
+                                            <SvgIcon name="copy" />
+                                          </div>
+                                        </template>
+                                        复制
+                                      </n-tooltip>
+                                      <n-tooltip trigger="hover">
+                                        <template #trigger>
+                                          <div
+                                            class="delete-btn"
+                                            @click.stop="
+                                              handleItmeDelete(index, gi.list)
+                                            "
+                                          >
+                                            <SvgIcon name="delete" />
+                                          </div>
+                                        </template>
+                                        删除
+                                      </n-tooltip>
+                                    </div>
+                                  </div>
+                                </transition-group>
+                              </template>
+                            </Draggable>
+                          </n-gi>
+                        </n-grid>
+                        <div
+                          class="drag-btn"
+                          v-if="currentData?.key === element.key"
+                        >
+                          <SvgIcon name="drag" />
+                        </div>
+
+                        <div
+                          class="action-bar"
+                          v-if="currentData?.key === element.key"
+                        >
+                          <n-tooltip trigger="hover">
+                            <template #trigger>
+                              <div
+                                class="copy-btn"
+                                @click.stop="handleItemCopy(index)"
+                              >
+                                <SvgIcon name="copy" />
+                              </div>
+                            </template>
+                            复制
+                          </n-tooltip>
+                          <n-tooltip trigger="hover">
+                            <template #trigger>
+                              <div
+                                class="delete-btn"
+                                @click.stop="handleItmeDelete(index)"
+                              >
+                                <SvgIcon name="delete" />
+                              </div>
+                            </template>
+                            删除
+                          </n-tooltip>
+                        </div>
+                      </div>
+                    </template>
+                    <template v-else>
+                      <div
+                        class="item-wrapper"
                         v-if="element.key"
                         :key="element.key"
-                        :cols="element.componentProps.cols"
-                        :x-gap="element.componentProps.xGap"
-                        :y-gap="element.componentProps.yGap"
+                        :class="{ active: currentData?.key === element.key }"
+                        @click="handleItemClick(element)"
                       >
-                        <n-gi
-                          class="grid-item"
-                          v-for="(gi, giIndex) in element.columns"
-                          :key="giIndex"
-                          :span="gi.span"
-                        >
-                          <Draggable
-                            class="gird-item-gi-list"
-                            item-key="key"
-                            ghostClass="form-ghost"
-                            handle=".drag-btn"
-                            :animation="200"
-                            :group="{ name: 'people' }"
-                            :no-transition-on-drag="true"
-                            :list="gi.list"
-                            @add="handleGiAdd($event, element, giIndex)"
+                        <n-form-item :label="element.label">
+                          <n-radio-group
+                            v-if="element.component === 'NRadio'"
+                            v-bind="element.componentProps"
+                            v-model:value="element.componentProps.value"
                           >
-                            <template #item="{ element, index }">
-                              <transition-group name="fade" tag="div">
-                                <div
-                                  v-if="
-                                    element.key && element.component != 'NGrid'
-                                  "
-                                  :key="element.key"
-                                  class="item-wrapper"
-                                  :class="{
-                                    active: currentData?.key === element.key,
-                                  }"
-                                  @click.stop="handleItemClick(element)"
-                                >
-                                  <n-form-item :label="element.label">
-                                    <n-radio-group
-                                      v-if="element.component === 'NRadio'"
-                                      v-bind="element.componentProps"
-                                      v-model:value="
-                                        element.componentProps.value
-                                      "
-                                    >
-                                      <n-radio
-                                        v-for="item in element.componentProps
-                                          .options"
-                                        :key="item.value"
-                                        :value="item.value"
-                                        :disabled="item.disabled"
-                                      >
-                                        {{ item.label }}
-                                      </n-radio>
-                                    </n-radio-group>
-
-                                    <n-checkbox-group
-                                      v-else-if="
-                                        element.component === 'NCheckBox'
-                                      "
-                                      v-bind="element.componentProps"
-                                      v-model:value="
-                                        element.componentProps.value
-                                      "
-                                    >
-                                      <n-checkbox
-                                        v-for="item in element.componentProps
-                                          .options"
-                                        :key="item.value"
-                                        :value="item.value"
-                                        :label="item.label"
-                                        :disabled="item.disabled"
-                                      />
-                                    </n-checkbox-group>
-
-                                    <component
-                                      v-else
-                                      :is="element.component"
-                                      v-bind="element.componentProps"
-                                      v-model:value="
-                                        element.componentProps.value
-                                      "
-                                    />
-                                  </n-form-item>
-                                  <div
-                                    class="drag-btn"
-                                    v-if="currentData?.key === element.key"
-                                  >
-                                    <SvgIcon name="drag" />
-                                  </div>
-                                  <div
-                                    class="action-bar"
-                                    v-if="currentData?.key === element.key"
-                                  >
-                                    <n-tooltip trigger="hover">
-                                      <template #trigger>
-                                        <div
-                                          class="copy-btn"
-                                          @click.stop="
-                                            handleItemCopy(index, gi.list)
-                                          "
-                                        >
-                                          <SvgIcon name="copy" />
-                                        </div>
-                                      </template>
-                                      复制
-                                    </n-tooltip>
-                                    <n-tooltip trigger="hover">
-                                      <template #trigger>
-                                        <div
-                                          class="delete-btn"
-                                          @click.stop="
-                                            handleItmeDelete(index, gi.list)
-                                          "
-                                        >
-                                          <SvgIcon name="delete" />
-                                        </div>
-                                      </template>
-                                      删除
-                                    </n-tooltip>
-                                  </div>
-                                </div>
-                              </transition-group>
-                            </template>
-                          </Draggable>
-                        </n-gi>
-                      </n-grid>
-                      <div
-                        class="drag-btn"
-                        v-if="currentData?.key === element.key"
-                      >
-                        <SvgIcon name="drag" />
-                      </div>
-
-                      <div
-                        class="action-bar"
-                        v-if="currentData?.key === element.key"
-                      >
-                        <n-tooltip trigger="hover">
-                          <template #trigger>
-                            <div
-                              class="copy-btn"
-                              @click.stop="handleItemCopy(index)"
+                            <n-radio
+                              v-for="item in element.componentProps.options"
+                              :key="item.value"
+                              :value="item.value"
+                              :disabled="item.disabled"
                             >
-                              <SvgIcon name="copy" />
-                            </div>
-                          </template>
-                          复制
-                        </n-tooltip>
-                        <n-tooltip trigger="hover">
-                          <template #trigger>
-                            <div
-                              class="delete-btn"
-                              @click.stop="handleItmeDelete(index)"
-                            >
-                              <SvgIcon name="delete" />
-                            </div>
-                          </template>
-                          删除
-                        </n-tooltip>
-                      </div>
-                    </div>
-                  </template>
-                  <template v-else>
-                    <div
-                      class="item-wrapper"
-                      v-if="element.key"
-                      :key="element.key"
-                      :class="{ active: currentData?.key === element.key }"
-                      @click="handleItemClick(element)"
-                    >
-                      <n-form-item :label="element.label">
-                        <n-radio-group
-                          v-if="element.component === 'NRadio'"
-                          v-bind="element.componentProps"
-                          v-model:value="element.componentProps.value"
-                        >
-                          <n-radio
-                            v-for="item in element.componentProps.options"
-                            :key="item.value"
-                            :value="item.value"
-                            :disabled="item.disabled"
+                              {{ item.label }}
+                            </n-radio>
+                          </n-radio-group>
+
+                          <n-checkbox-group
+                            v-else-if="element.component === 'NCheckBox'"
+                            v-bind="element.componentProps"
+                            v-model:value="element.componentProps.value"
                           >
-                            {{ item.label }}
-                          </n-radio>
-                        </n-radio-group>
-
-                        <n-checkbox-group
-                          v-else-if="element.component === 'NCheckBox'"
-                          v-bind="element.componentProps"
-                          v-model:value="element.componentProps.value"
-                        >
-                          <n-checkbox
-                            v-for="item in element.componentProps.options"
-                            :key="item.value"
-                            :value="item.value"
-                            :label="item.label"
-                            :disabled="item.disabled"
+                            <n-checkbox
+                              v-for="item in element.componentProps.options"
+                              :key="item.value"
+                              :value="item.value"
+                              :label="item.label"
+                              :disabled="item.disabled"
+                            />
+                          </n-checkbox-group>
+                          <component
+                            v-else
+                            :is="element.component"
+                            v-bind="element.componentProps"
+                            v-model:value="element.componentProps.value"
                           />
-                        </n-checkbox-group>
-                        <component
-                          v-else
-                          :is="element.component"
-                          v-bind="element.componentProps"
-                          v-model:value="element.componentProps.value"
-                        />
-                      </n-form-item>
-                      <div
-                        class="drag-btn"
-                        v-if="currentData?.key === element.key"
-                      >
-                        <SvgIcon name="drag" />
+                        </n-form-item>
+                        <div
+                          class="drag-btn"
+                          v-if="currentData?.key === element.key"
+                        >
+                          <SvgIcon name="drag" />
+                        </div>
+                        <div
+                          class="action-bar"
+                          v-if="currentData?.key === element.key"
+                        >
+                          <n-tooltip trigger="hover">
+                            <template #trigger>
+                              <div
+                                class="copy-btn"
+                                @click.stop="handleItemCopy(index)"
+                              >
+                                <SvgIcon name="copy" />
+                              </div>
+                            </template>
+                            复制
+                          </n-tooltip>
+                          <n-tooltip trigger="hover">
+                            <template #trigger>
+                              <div
+                                class="delete-btn"
+                                @click.stop="handleItmeDelete(index)"
+                              >
+                                <SvgIcon name="delete" />
+                              </div>
+                            </template>
+                            删除
+                          </n-tooltip>
+                        </div>
                       </div>
-                      <div
-                        class="action-bar"
-                        v-if="currentData?.key === element.key"
-                      >
-                        <n-tooltip trigger="hover">
-                          <template #trigger>
-                            <div
-                              class="copy-btn"
-                              @click.stop="handleItemCopy(index)"
-                            >
-                              <SvgIcon name="copy" />
-                            </div>
-                          </template>
-                          复制
-                        </n-tooltip>
-                        <n-tooltip trigger="hover">
-                          <template #trigger>
-                            <div
-                              class="delete-btn"
-                              @click.stop="handleItmeDelete(index)"
-                            >
-                              <SvgIcon name="delete" />
-                            </div>
-                          </template>
-                          删除
-                        </n-tooltip>
-                      </div>
-                    </div>
-                  </template>
-                </transition-group>
-              </template>
-            </Draggable>
-            <div class="form-wrapper-empty" v-if="!schema.length">
-              <n-text :depth="3">
-                请从左侧列表中选择一个组件, 然后用鼠标拖动组件放置于此处
-              </n-text>
-            </div>
-          </n-form>
-        </n-card>
-      </n-layout-content>
+                    </template>
+                  </transition-group>
+                </template>
+              </Draggable>
+              <div class="form-wrapper-empty" v-if="!schema.length">
+                <n-text :depth="3">
+                  请从左侧列表中选择一个组件, 然后用鼠标拖动组件放置于此处
+                </n-text>
+              </div>
+            </n-form>
+          </n-card>
+        </n-layout-content>
+      </n-layout>
+      <formSetting v-model:current-data="currentData" :form-props="formProps" />
     </n-layout>
-    <formSetting v-model:current-data="currentData" :form-porps="formPorps" />
-  </n-layout>
+    <exportForJson ref="jsonModalRef" :list="schema" :form-props="formProps" />
+    <formPreView ref="preViewModalRef" :list="schema" :form-props="formProps" />
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "vue";
+import { defineComponent, computed, ref, Ref } from "vue";
 import { formItemsData } from "./utils/data";
-import { formComponents, formSetting } from "./components";
+import {
+  formComponents,
+  formSetting,
+  exportForJson,
+  formPreView,
+} from "./components";
 import { SvgIcon } from "@/components/SvgIcon";
 import Draggable from "vuedraggable/src/vuedraggable";
 import { useFormDesigner } from "./hooks/useFormDesigner";
 import { FormItems } from "./types";
 export default defineComponent({
   name: "FormDesigner",
-  components: { formComponents, formSetting, SvgIcon, Draggable },
+  components: {
+    SvgIcon,
+    Draggable,
+    formSetting,
+    formComponents,
+    exportForJson,
+    formPreView,
+  },
   setup(props, { emit }) {
     const {
       schema,
-      formPorps,
+      formProps,
       handleAdd,
       handleGiAdd,
       currentData,
       handleClear,
-      handlePreview,
       handleItemCopy,
       handleItemClick,
       handleItmeDelete,
     } = useFormDesigner();
+
     const getComponentProps = (component: FormItems) => {
       const componentProps = computed(() => component.componentProps ?? {});
       return componentProps;
     };
+    const jsonModalRef: Ref<typeof exportForJson | null> = ref(null);
+    const preViewModalRef: Ref<typeof formPreView | null> = ref(null);
+
+    const handlePreview = () => {
+      preViewModalRef.value?.openModal();
+    };
+    const handleExportJson = () => {
+      jsonModalRef.value?.openModal();
+    };
     return {
       schema,
-      formPorps,
+      formProps,
       handleAdd,
       handleGiAdd,
       currentData,
+      jsonModalRef,
+      preViewModalRef,
       handleClear,
       handlePreview,
       handleItemCopy,
       handleItemClick,
       handleItmeDelete,
+      handleExportJson,
       getComponentProps,
       comlist: JSON.parse(JSON.stringify(formItemsData)),
     };

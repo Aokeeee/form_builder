@@ -45,14 +45,14 @@
                 :label-style="{ fontSize: '13px' }"
                 label="唯一标识"
               >
-                <n-input v-model:value="getCurrentData.id" />
+                <n-input v-model:value="getCurrentData.field" />
               </n-form-item-gi>
               <n-form-item-gi
                 :span="2"
                 :label-style="{ fontSize: '13px' }"
-                label="标签"
+                label="标签名称"
               >
-                <n-input v-model:value="getCurrentData.icon" disabled />
+                <n-input v-model:value="getCurrentData.label" />
               </n-form-item-gi>
               <n-form-item-gi
                 :span="2"
@@ -66,7 +66,7 @@
                       'NSelect',
                       'NInput',
                       'NInputNumber',
-                      'NDataPicker',
+                      'NDatePicker',
                       'NTimePicker',
                     ].includes(getCurrentData.component)
                   "
@@ -86,16 +86,33 @@
                   v-model:value="getCurrentData.componentProps.value"
                 />
               </n-form-item-gi>
-
+              <n-form-item-gi
+                :span="2"
+                label="占位符"
+                v-if="
+                  [
+                    'NSelect',
+                    'NInput',
+                    'NInputNumber',
+                    'NDataPicker',
+                    'NTimePicker',
+                  ].includes(getCurrentData.component)
+                "
+              >
+                <n-input
+                  v-model:value="getCurrentData.componentProps.placeholder"
+                />
+              </n-form-item-gi>
               <n-form-item-gi
                 :span="2"
                 :label-style="{ fontSize: '13px' }"
                 v-if="getCurrentData.component === 'NGrid'"
               >
-                <div style="width: 100%" class="select-componet-toolbar">
+                <div style="width: 100%" class="select-component-toolbar">
                   <n-divider style="margin: 0 0 12px 0; font-size: 13px">
                     栅格配置
                   </n-divider>
+
                   <n-form-item
                     label="栅格间隔"
                     :label-style="{ fontSize: '13px' }"
@@ -119,17 +136,17 @@
                   <Draggable
                     item-key="value"
                     :animation="200"
-                    handle=".select-componet-toolbar-item-drag-btn"
+                    handle=".select-component-toolbar-item-drag-btn"
                     :list="getCurrentData.columns"
                   >
                     <template #item="{ element, index }">
                       <transition-group
                         name="fade"
                         tag="div"
-                        class="select-componet-toolbar-item"
+                        class="select-component-toolbar-item"
                       >
                         <n-space :wrap="false" :key="index" align="center">
-                          <div class="select-componet-toolbar-item-drag-btn">
+                          <div class="select-component-toolbar-item-drag-btn">
                             <SvgIcon name="drag2" />
                           </div>
                           <div style="width: 70px; font-size: 13px">
@@ -143,7 +160,7 @@
                             :max="24"
                           />
 
-                          <div class="select-componet-toolbar-item-del-btn">
+                          <div class="select-component-toolbar-item-del-btn">
                             <n-button
                               text
                               type="error"
@@ -159,7 +176,7 @@
                       </transition-group>
                     </template>
                   </Draggable>
-                  <div class="select-componet-toolbar-actions">
+                  <div class="select-component-toolbar-actions">
                     <n-button
                       text
                       type="info"
@@ -229,184 +246,247 @@
                   )
                 "
               >
-                <div style="width: 100%" class="select-componet-toolbar">
+                <div style="width: 100%" class="select-component-toolbar">
                   <n-divider style="margin: 0 0 8px 0; font-size: 13px">
                     选项设置
                   </n-divider>
-                  <Draggable
-                    item-key="value"
-                    :animation="200"
-                    ghostClass="ghost"
-                    handle=".select-componet-toolbar-item-drag-btn"
-                    :list="getCurrentData.componentProps.options"
+                  <n-tabs
+                    v-if="getCurrentData.component === 'NSelect'"
+                    type="segment"
+                    size="small"
+                    style="margin-bottom: 12px"
+                    v-model:value="selectTabsVal"
+                    @update-value="
+                      getCurrentData.componentProps.labelField = '';
+                      getCurrentData.componentProps.valueField = '';
+                      getCurrentData.componentProps.customRemoteAddress = '';
+                    "
                   >
-                    <template #item="{ element, index }">
-                      <transition-group
-                        name="fade"
-                        tag="div"
-                        class="select-componet-toolbar-item"
-                      >
-                        <template
-                          v-if="
-                            getCurrentData.component === 'NCheckBox' ||
-                            (getCurrentData.component === 'NSelect' &&
-                              getCurrentData.componentProps.multiple)
-                          "
-                          :key="element.value"
+                    <n-tab name="static"> 静态数据 </n-tab>
+                    <n-tab name="distal"> 远端数据 </n-tab>
+                  </n-tabs>
+
+                  <div v-if="selectTabsVal === 'static'">
+                    <Draggable
+                      v-if="selectTabsVal === 'static'"
+                      item-key="value"
+                      :animation="200"
+                      ghostClass="ghost"
+                      handle=".select-component-toolbar-item-drag-btn"
+                      :list="getCurrentData.componentProps.options"
+                    >
+                      <template #item="{ element, index }">
+                        <transition-group
+                          name="fade"
+                          tag="div"
+                          class="select-component-toolbar-item"
                         >
-                          <n-checkbox-group
-                            v-model:value="getCurrentData.componentProps.value"
-                          >
-                            <n-space :wrap="false">
-                              <div
-                                class="select-componet-toolbar-item-drag-btn"
-                              >
-                                <SvgIcon name="drag2" />
-                              </div>
-                              <div
-                                class="select-componet-toolbar-item-selectcom"
-                              >
-                                <n-checkbox
-                                  size="large"
-                                  :value="element.value"
-                                  :disabled="element.disabled"
-                                />
-                              </div>
-                              <n-input
-                                size="small"
-                                v-model:value="element.label"
-                              />
-                              <n-input
-                                size="small"
-                                v-model:value="element.value"
-                              />
-                              <div class="select-componet-toolbar-item-del-btn">
-                                <n-button
-                                  text
-                                  type="error"
-                                  :disabled="
-                                    getCurrentData.componentProps.options
-                                      .length === 1
-                                  "
-                                  @click="
-                                    getCurrentData.componentProps.options.splice(
-                                      index,
-                                      1
-                                    )
-                                  "
-                                >
-                                  <template #icon>
-                                    <SvgIcon name="delete" />
-                                  </template>
-                                </n-button>
-                              </div>
-                              <div class="select-componet-toolbar-item-dis-btn">
-                                <n-button
-                                  text
-                                  type="warning"
-                                  @click="element.disabled = !element.disabled"
-                                >
-                                  <template #icon>
-                                    <SvgIcon name="disabled" />
-                                  </template>
-                                </n-button>
-                              </div>
-                            </n-space>
-                          </n-checkbox-group>
-                        </template>
-                        <template v-else>
-                          <n-radio-group
+                          <template
+                            v-if="
+                              getCurrentData.component === 'NCheckBox' ||
+                              (getCurrentData.component === 'NSelect' &&
+                                getCurrentData.componentProps.multiple)
+                            "
                             :key="element.value"
-                            v-model:value="getCurrentData.componentProps.value"
-                            name="selectitemradiogroup"
                           >
-                            <n-space :wrap="false">
-                              <div
-                                class="select-componet-toolbar-item-drag-btn"
-                              >
-                                <SvgIcon name="drag2" />
-                              </div>
-                              <div
-                                class="select-componet-toolbar-item-selectcom"
-                              >
-                                <n-radio
-                                  size="large"
-                                  :key="element.value"
-                                  v-model:value="element.value"
-                                  :disabled="element.disabled"
+                            <n-checkbox-group
+                              v-model:value="
+                                getCurrentData.componentProps.value
+                              "
+                            >
+                              <n-space :wrap="false">
+                                <div
+                                  class="select-component-toolbar-item-drag-btn"
+                                >
+                                  <SvgIcon name="drag2" />
+                                </div>
+                                <div
+                                  class="select-component-toolbar-item-selectcom"
+                                >
+                                  <n-checkbox
+                                    size="large"
+                                    :value="element.value"
+                                    :disabled="element.disabled"
+                                  />
+                                </div>
+                                <n-input
+                                  size="small"
+                                  v-model:value="element.label"
                                 />
-                              </div>
-                              <n-input
-                                size="small"
-                                v-model:value="element.label"
-                              />
-                              <n-input
-                                size="small"
-                                v-model:value="element.value"
-                              />
-                              <div class="select-componet-toolbar-item-del-btn">
-                                <n-button
-                                  text
-                                  type="error"
-                                  :disabled="
-                                    getCurrentData.componentProps.options
-                                      .length === 1
-                                  "
-                                  @click="
-                                    getCurrentData.componentProps.options.splice(
-                                      index,
-                                      1
-                                    )
-                                  "
+                                <n-input
+                                  size="small"
+                                  v-model:value="element.value"
+                                />
+                                <div
+                                  class="select-component-toolbar-item-del-btn"
                                 >
-                                  <template #icon>
-                                    <SvgIcon name="delete" />
-                                  </template>
-                                </n-button>
-                              </div>
-                              <div class="select-componet-toolbar-item-dis-btn">
-                                <n-button
-                                  text
-                                  type="warning"
-                                  @click="element.disabled = !element.disabled"
+                                  <n-button
+                                    text
+                                    type="error"
+                                    :disabled="
+                                      getCurrentData.componentProps.options
+                                        .length === 1
+                                    "
+                                    @click="
+                                      getCurrentData.componentProps.options.splice(
+                                        index,
+                                        1
+                                      )
+                                    "
+                                  >
+                                    <template #icon>
+                                      <SvgIcon name="delete" />
+                                    </template>
+                                  </n-button>
+                                </div>
+                                <div
+                                  class="select-component-toolbar-item-dis-btn"
                                 >
-                                  <template #icon>
-                                    <SvgIcon name="disabled" />
-                                  </template>
-                                </n-button>
-                              </div>
-                            </n-space>
-                          </n-radio-group>
-                        </template>
-                      </transition-group>
-                    </template>
-                  </Draggable>
-                  <div class="select-componet-toolbar-actions">
-                    <n-space>
-                      <n-button
-                        text
-                        type="info"
-                        @click="
-                          getCurrentData.componentProps.options.push({
-                            label: `${getCurrentData.icon}${
-                              getCurrentData.componentProps.options.length + 1
-                            }`,
-                            value: `${getCurrentData.icon}${
-                              getCurrentData.componentProps.options.length + 1
-                            }`,
-                          })
+                                  <n-button
+                                    text
+                                    type="warning"
+                                    @click="
+                                      element.disabled = !element.disabled
+                                    "
+                                  >
+                                    <template #icon>
+                                      <SvgIcon name="disabled" />
+                                    </template>
+                                  </n-button>
+                                </div>
+                              </n-space>
+                            </n-checkbox-group>
+                          </template>
+                          <template v-else>
+                            <n-radio-group
+                              :key="element.value"
+                              v-model:value="
+                                getCurrentData.componentProps.value
+                              "
+                              name="selectitemradiogroup"
+                            >
+                              <n-space :wrap="false">
+                                <div
+                                  class="select-component-toolbar-item-drag-btn"
+                                >
+                                  <SvgIcon name="drag2" />
+                                </div>
+                                <div
+                                  class="select-component-toolbar-item-selectcom"
+                                >
+                                  <n-radio
+                                    size="large"
+                                    :key="element.value"
+                                    v-model:value="element.value"
+                                    :disabled="element.disabled"
+                                  />
+                                </div>
+                                <n-input
+                                  size="small"
+                                  v-model:value="element.label"
+                                />
+                                <n-input
+                                  size="small"
+                                  v-model:value="element.value"
+                                />
+                                <div
+                                  class="select-component-toolbar-item-del-btn"
+                                >
+                                  <n-button
+                                    text
+                                    type="error"
+                                    :disabled="
+                                      getCurrentData.componentProps.options
+                                        .length === 1
+                                    "
+                                    @click="
+                                      getCurrentData.componentProps.options.splice(
+                                        index,
+                                        1
+                                      )
+                                    "
+                                  >
+                                    <template #icon>
+                                      <SvgIcon name="delete" />
+                                    </template>
+                                  </n-button>
+                                </div>
+                                <div
+                                  class="select-component-toolbar-item-dis-btn"
+                                >
+                                  <n-button
+                                    text
+                                    type="warning"
+                                    @click="
+                                      element.disabled = !element.disabled
+                                    "
+                                  >
+                                    <template #icon>
+                                      <SvgIcon name="disabled" />
+                                    </template>
+                                  </n-button>
+                                </div>
+                              </n-space>
+                            </n-radio-group>
+                          </template>
+                        </transition-group>
+                      </template>
+                    </Draggable>
+                    <div class="select-component-toolbar-actions">
+                      <n-space>
+                        <n-button
+                          text
+                          type="info"
+                          @click="
+                            getCurrentData.componentProps.options.push({
+                              label: `${getCurrentData.icon}${
+                                getCurrentData.componentProps.options.length + 1
+                              }`,
+                              value: `${getCurrentData.icon}${
+                                getCurrentData.componentProps.options.length + 1
+                              }`,
+                            })
+                          "
+                        >
+                          增加选项
+                        </n-button>
+                        <n-button
+                          text
+                          type="info"
+                          @click="getCurrentData.componentProps.value = null"
+                        >
+                          重置选中项
+                        </n-button>
+                      </n-space>
+                    </div>
+                  </div>
+                  <div v-else>
+                    <n-input-group style="margin-bottom: 12px">
+                      <n-input-group-label size="small">
+                        接 口
+                      </n-input-group-label>
+                      <n-input
+                        v-model:value="
+                          getCurrentData.componentProps.customRemoteAddress
                         "
-                      >
-                        增加选项
-                      </n-button>
-                      <n-button
-                        text
-                        type="info"
-                        @click="getCurrentData.componentProps.value = null"
-                      >
-                        重置选中项
-                      </n-button>
-                    </n-space>
+                      />
+                    </n-input-group>
+                    <n-input-group style="margin-bottom: 12px">
+                      <n-input-group-label size="small">
+                        label
+                      </n-input-group-label>
+                      <n-input
+                        v-model:value="getCurrentData.componentProps.labelField"
+                      />
+                    </n-input-group>
+                    <n-input-group>
+                      <n-input-group-label size="small">
+                        value
+                      </n-input-group-label>
+                      <n-input
+                        v-model:value="getCurrentData.componentProps.valueField"
+                      />
+                    </n-input-group>
                   </div>
                 </div>
               </n-form-item-gi>
@@ -529,19 +609,19 @@ import { SvgIcon } from "@/components/SvgIcon";
 import { FormItems, GenFormProps } from "../types";
 import Draggable from "vuedraggable/src/vuedraggable";
 import { ref, PropType, computed, defineComponent, watchEffect } from "vue";
-import { emit } from "process";
 
 export default defineComponent({
   name: "formSetting",
   components: { SvgIcon, Draggable },
   props: {
     currentData: Object as PropType<FormItems>,
-    formPorps: Object as PropType<GenFormProps>,
+    formProps: Object as PropType<GenFormProps>,
   },
   emits: ["update:currentData"],
   setup(props, { emit }) {
     const tabsVal = ref("components_setting");
-    const getFormPorps = computed(() => props.formPorps ?? undefined);
+    const selectTabsVal = ref("static");
+    const getFormPorps = computed(() => props.formProps ?? undefined);
     const getCurrentData = computed(() => props.currentData ?? undefined);
     const count = ref(0);
     const handleAddSelectItem = () => {};
@@ -564,6 +644,7 @@ export default defineComponent({
       tabsVal,
       sizeData,
       getFormPorps,
+      selectTabsVal,
       getCurrentData,
       labelAlignData,
       labelPlacementData,
@@ -615,7 +696,7 @@ export default defineComponent({
             margin-left: 40px;
           }
         }
-        .select-componet-toolbar {
+        .select-component-toolbar {
           width: 100%;
 
           &-item {
@@ -660,10 +741,10 @@ export default defineComponent({
           padding: 0 8px;
         }
 
-        .n-radio-group .n-radio-button.n-radio-button--checked {
-          background: var(--n-button-text-color-active);
-          color: var(--n-color);
-        }
+        // .n-radio-group .n-radio-button.n-radio-button--checked {
+        //   background: var(--n-button-text-color-active);
+        //   color: var(--n-color);
+        // }
       }
     }
   }

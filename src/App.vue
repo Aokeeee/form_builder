@@ -5,8 +5,9 @@
 </template>
 
 <script lang="ts" setup>
-import { NConfigProvider } from "naive-ui";
+import { NConfigProvider, darkTheme } from "naive-ui";
 import { FormDesigner } from "@/components/FormDesigner";
+
 const themeOverrides = {
   Tooltip: {
     padding: "2px 4px",

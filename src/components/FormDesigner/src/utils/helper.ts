@@ -59,6 +59,9 @@ export const genFormComponentPorps = (form: FormItems) => {
       componentProps = {
         ...componentProps,
         multiple: false,
+        labelField: "label",
+        valueField: "value",
+        customRemoteAddress: "",
       };
       break;
 

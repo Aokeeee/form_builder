@@ -1,13 +1,14 @@
-import { ref, reactive } from "vue";
+import { ref, reactive, toRefs } from "vue";
 import { v4 } from "uuid";
 import { FormItems, GenFormProps } from "../types";
 import { genFormComponentPorps } from "../utils/helper";
 export function useFormDesigner() {
   const schema = ref<FormItems[]>([]);
   const currentData = ref<FormItems | undefined>(undefined);
-  const formPorps = reactive<GenFormProps>({
+
+  const formProps = reactive<GenFormProps>({
     title: "默认标题",
-    width: 500,
+    width: 600,
     size: "medium",
     labelPlacement: "left",
     labelAlign: "center",
@@ -20,7 +21,7 @@ export function useFormDesigner() {
     schema.value[newIndex] = {
       ...schema.value[newIndex],
       key,
-      id: `${schema.value[newIndex].icon}_${key}`,
+      field: `${schema.value[newIndex].icon}_${key}`,
       componentProps: {
         ...genFormComponentPorps(schema.value[newIndex]),
       },
@@ -64,7 +65,7 @@ export function useFormDesigner() {
       row.columns[index].list[newIndex] = {
         ...row.columns[index].list[newIndex],
         key,
-        id: `${row.columns[index].list[newIndex].icon}_${key}`,
+        field: `${row.columns[index].list[newIndex].icon}_${key}`,
         componentProps: {
           ...genFormComponentPorps(row.columns[index].list[newIndex]),
         },
@@ -97,7 +98,7 @@ export function useFormDesigner() {
     const copyData: FormItems = {
       ...arr[index],
       key,
-      id: `${arr[index].icon}_${key}`,
+      field: `${arr[index].icon}_${key}`,
       componentProps: {
         ...genFormComponentPorps(arr[index]),
       },
@@ -124,18 +125,14 @@ export function useFormDesigner() {
     schema.value = [];
     currentData.value = undefined;
   };
-  const handlePreview = () => {
-    console.log(schema.value);
-  };
 
   return {
     schema,
-    formPorps,
+    formProps,
     handleAdd,
     handleGiAdd,
     handleClear,
     currentData,
-    handlePreview,
     handleItemCopy,
     handleItemClick,
     handleItmeDelete,

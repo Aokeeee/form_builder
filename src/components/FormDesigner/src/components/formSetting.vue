@@ -104,6 +104,26 @@
                 />
               </n-form-item-gi>
               <n-form-item-gi
+                v-if="getCurrentData.component !== 'NGrid'"
+                :span="2"
+                :label-style="{ fontSize: '13px' }"
+                label="必填字段"
+              >
+                <n-switch
+                  v-model:value="getCurrentData.componentProps.required"
+                />
+              </n-form-item-gi>
+              <n-form-item-gi
+                v-if="getCurrentData.component !== 'NGrid'"
+                :span="2"
+                :label-style="{ fontSize: '13px' }"
+                label="校验提示"
+              >
+                <n-input
+                  v-model:value="getCurrentData.componentProps.message"
+                />
+              </n-form-item-gi>
+              <n-form-item-gi
                 :span="2"
                 :label-style="{ fontSize: '13px' }"
                 v-if="getCurrentData.component === 'NGrid'"
@@ -194,6 +214,17 @@
               </n-form-item-gi>
 
               <n-form-item-gi
+                v-if="getCurrentData.component === 'NSelect'"
+                :span="2"
+                label="是否多选"
+                :label-style="{ fontSize: '13px' }"
+              >
+                <n-switch
+                  v-model:value="getCurrentData.componentProps.multiple"
+                  @update-value="getCurrentData.componentProps.value = null"
+                />
+              </n-form-item-gi>
+              <n-form-item-gi
                 v-if="
                   !['NText', 'NRate', 'NGrid', 'NSlider'].includes(
                     getCurrentData.component
@@ -205,17 +236,6 @@
               >
                 <n-switch
                   v-model:value="getCurrentData.componentProps.disabled"
-                />
-              </n-form-item-gi>
-              <n-form-item-gi
-                v-if="getCurrentData.component === 'NSelect'"
-                :span="2"
-                label="是否多选"
-                :label-style="{ fontSize: '13px' }"
-              >
-                <n-switch
-                  v-model:value="getCurrentData.componentProps.multiple"
-                  @update-value="getCurrentData.componentProps.value = null"
                 />
               </n-form-item-gi>
               <n-form-item-gi
@@ -257,8 +277,8 @@
                     style="margin-bottom: 12px"
                     v-model:value="selectTabsVal"
                     @update-value="
-                      getCurrentData.componentProps.labelField = '';
-                      getCurrentData.componentProps.valueField = '';
+                      getCurrentData.componentProps.labelField = 'label';
+                      getCurrentData.componentProps.valueField = 'value';
                       getCurrentData.componentProps.customRemoteAddress = '';
                     "
                   >
@@ -336,21 +356,6 @@
                                   >
                                     <template #icon>
                                       <SvgIcon name="delete" />
-                                    </template>
-                                  </n-button>
-                                </div>
-                                <div
-                                  class="select-component-toolbar-item-dis-btn"
-                                >
-                                  <n-button
-                                    text
-                                    type="warning"
-                                    @click="
-                                      element.disabled = !element.disabled
-                                    "
-                                  >
-                                    <template #icon>
-                                      <SvgIcon name="disabled" />
                                     </template>
                                   </n-button>
                                 </div>
@@ -490,7 +495,6 @@
                   </div>
                 </div>
               </n-form-item-gi>
-              <!-- <n-form-item-gi> </n-form-item-gi> -->
             </n-grid>
           </n-collapse-item>
         </n-collapse>

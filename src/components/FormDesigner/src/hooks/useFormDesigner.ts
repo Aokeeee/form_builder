@@ -39,7 +39,6 @@ export function useFormDesigner() {
               },
             ]
           : null,
-      rules: schema.value[newIndex].component === "NGrid" ? null : [],
     };
 
     currentData.value = schema.value[newIndex];

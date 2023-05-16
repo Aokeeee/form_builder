@@ -1,7 +1,12 @@
 <template>
   <n-layout-sider bordered class="components-wrapper">
     <n-layout-header class="components-toolbar">
-      <n-tabs type="line" animated justify-content="space-around">
+      <n-tabs
+        type="line"
+        animated
+        justify-content="space-around"
+        v-model:value="tabsVal"
+      >
         <n-tab name="components">
           <SvgIcon name="components" />
           组件库
@@ -20,6 +25,7 @@
       }"
     >
       <n-collapse
+        v-if="tabsVal === 'components'"
         arrow-placement="right"
         :default-expanded-names="[
           'BasicField',
@@ -57,6 +63,10 @@
           </Draggable>
         </n-collapse-item>
       </n-collapse>
+      <ul v-else>
+        <!-- <li>表单模板列表</li> -->
+        <n-empty> </n-empty>
+      </ul>
     </n-layout>
   </n-layout-sider>
 </template>
@@ -64,7 +74,7 @@
 <script lang="ts">
 import { FormData } from "../types";
 import { SvgIcon } from "@/components/SvgIcon";
-import { PropType, defineComponent } from "vue";
+import { PropType, defineComponent, ref } from "vue";
 import Draggable from "vuedraggable/src/vuedraggable";
 import { formItemsData } from "../utils/data";
 export default defineComponent({
@@ -75,7 +85,9 @@ export default defineComponent({
   },
   components: { SvgIcon, Draggable },
   setup(props, { emit }) {
+    const tabsVal = ref("components");
     return {
+      tabsVal,
       formItemsData,
     };
   },

@@ -99,7 +99,12 @@
                                     }"
                                     @click.stop="handleItemClick(element)"
                                   >
-                                    <n-form-item :label="element.label">
+                                    <n-form-item
+                                      :label="element.label"
+                                      :show-require-mark="
+                                        element.componentProps.required
+                                      "
+                                    >
                                       <n-radio-group
                                         v-if="element.component === 'NRadio'"
                                         v-bind="element.componentProps"
@@ -112,7 +117,6 @@
                                             .options"
                                           :key="item.value"
                                           :value="item.value"
-                                          :disabled="item.disabled"
                                         >
                                           {{ item.label }}
                                         </n-radio>
@@ -133,7 +137,6 @@
                                           :key="item.value"
                                           :value="item.value"
                                           :label="item.label"
-                                          :disabled="item.disabled"
                                         />
                                       </n-checkbox-group>
 
@@ -233,7 +236,10 @@
                         :class="{ active: currentData?.key === element.key }"
                         @click="handleItemClick(element)"
                       >
-                        <n-form-item :label="element.label">
+                        <n-form-item
+                          :label="element.label"
+                          :show-require-mark="element.componentProps.required"
+                        >
                           <n-radio-group
                             v-if="element.component === 'NRadio'"
                             v-bind="element.componentProps"
@@ -243,7 +249,6 @@
                               v-for="item in element.componentProps.options"
                               :key="item.value"
                               :value="item.value"
-                              :disabled="item.disabled"
                             >
                               {{ item.label }}
                             </n-radio>
@@ -259,7 +264,6 @@
                               :key="item.value"
                               :value="item.value"
                               :label="item.label"
-                              :disabled="item.disabled"
                             />
                           </n-checkbox-group>
                           <component
@@ -412,6 +416,7 @@ export default defineComponent({
     padding: 0;
     width: 100%;
   }
+
   .form-toolbar {
     padding: 0 20px;
     display: flex;
@@ -424,6 +429,7 @@ export default defineComponent({
       font-size: 16px;
     }
   }
+
   .form-wrapper {
     height: calc(100% - 42px);
 
@@ -431,6 +437,7 @@ export default defineComponent({
       min-height: calc(100vh - 64px);
       position: relative;
     }
+
     &-list {
       width: 100%;
       min-height: calc(100vh - 80px);
@@ -441,12 +448,15 @@ export default defineComponent({
         position: relative;
         border: 1px dashed var(--n-color-target);
         margin: 2px;
+
         .grid-item {
           border: 1px dashed var(--n-color-target);
+
           .gird-item-gi-list {
             min-height: 46px;
           }
         }
+
         .drag-btn {
           width: 20px;
           height: 20px;
@@ -460,14 +470,17 @@ export default defineComponent({
           justify-content: center;
           background-color: var(--n-color-target);
           transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
           .svg-icon {
             font-size: 16px;
             color: var(--n-color);
           }
+
           &:hover {
             opacity: 1;
           }
         }
+
         .action-bar {
           display: flex;
           align-items: center;
@@ -487,20 +500,24 @@ export default defineComponent({
             cursor: pointer;
             background-color: var(--n-color-target);
           }
+
           &:hover {
             opacity: 1;
           }
+
           .svg-icon {
             font-size: 16px;
             color: var(--n-color);
           }
         }
       }
+
       .active {
         outline: 1px solid var(--n-color-target);
         border: 2px solid var(--n-color-target);
       }
     }
+
     &-empty {
       width: 100%;
       height: calc(100vh - 74px);
@@ -510,6 +527,7 @@ export default defineComponent({
       position: absolute;
       left: 0;
       top: 0;
+
       .n-text {
         margin-bottom: 40px;
         font-size: 18px;

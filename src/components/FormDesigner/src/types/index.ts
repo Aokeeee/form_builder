@@ -11,7 +11,8 @@ export type FormComponent =
   | "NSlider"
   | "NTimePicker"
   | "NDatePicker"
-  | "NGrid";
+  | "NGrid"
+  | "NTransfer";
 
 export interface FormItems {
   label: string;

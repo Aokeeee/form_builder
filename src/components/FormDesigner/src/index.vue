@@ -351,8 +351,8 @@ export default defineComponent({
     formPreView,
   },
   setup(props, { emit }) {
-    const schema = ref<FormItems[]>([]);
     const {
+      schema,
       formProps,
       handleAdd,
       handleGiAdd,
@@ -361,7 +361,7 @@ export default defineComponent({
       handleItemCopy,
       handleItemClick,
       handleItmeDelete,
-    } = useFormDesigner(schema);
+    } = useFormDesigner();
 
     const getComponentProps = (component: FormItems) => {
       const componentProps = computed(() => component.componentProps ?? {});

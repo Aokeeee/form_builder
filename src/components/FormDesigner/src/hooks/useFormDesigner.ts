@@ -2,9 +2,9 @@ import { ref, reactive, toRefs, Ref } from "vue";
 import { v4 } from "uuid";
 import { FormItems, GenFormProps } from "../types";
 import { genFormComponentPorps } from "../utils/helper";
-export function useFormDesigner(schema: Ref<FormItems[]>) {
+export function useFormDesigner() {
+  const schema = ref<FormItems[]>([]);
   const currentData = ref<FormItems | undefined>(undefined);
-
   const formProps = reactive<GenFormProps>({
     title: "默认标题",
     width: 600,

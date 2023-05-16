@@ -351,8 +351,8 @@ export default defineComponent({
     formPreView,
   },
   setup(props, { emit }) {
+    const schema = ref<FormItems[]>([]);
     const {
-      schema,
       formProps,
       handleAdd,
       handleGiAdd,
@@ -361,7 +361,7 @@ export default defineComponent({
       handleItemCopy,
       handleItemClick,
       handleItmeDelete,
-    } = useFormDesigner();
+    } = useFormDesigner(schema);
 
     const getComponentProps = (component: FormItems) => {
       const componentProps = computed(() => component.componentProps ?? {});
@@ -376,8 +376,14 @@ export default defineComponent({
     const handleExportJson = () => {
       jsonModalRef.value?.openModal();
     };
+    const setSchema = (val: FormItems[]) => {
+      schema.value = val;
+      currentData.value = val[0];
+    };
+
     return {
       schema,
+      setSchema,
       formProps,
       handleAdd,
       handleGiAdd,

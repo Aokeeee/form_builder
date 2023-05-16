@@ -9,6 +9,9 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    NBackbackTop: typeof import('naive-ui')['NBackbackTop']
+    NBacktop: typeof import('naive-ui')['NBacktop']
+    NBackTop: typeof import('naive-ui')['NBackTop']
     NButton: typeof import('naive-ui')['NButton']
     NCard: typeof import('naive-ui')['NCard']
     NCheckbox: typeof import('naive-ui')['NCheckbox']

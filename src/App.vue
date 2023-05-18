@@ -1,6 +1,6 @@
 <template>
   <NConfigProvider :theme-overrides="themeOverrides">
-    <FormDesigner ref="formBuillder" />
+    <!-- <FormDesigner ref="formBuillder" />
 
     <n-button
       @click="handleChangeSchemas"
@@ -8,7 +8,8 @@
       style="position: fixed; bottom: 20px; right: 20px; z-index: 99999999"
     >
       click
-    </n-button>
+    </n-button> -->
+    <VueFlowRender />
   </NConfigProvider>
 </template>
 
@@ -16,6 +17,7 @@
 import { ref } from "vue";
 import { NConfigProvider, darkTheme } from "naive-ui";
 import { FormDesigner } from "@/components/FormDesigner";
+import { VueFlowRender } from "@/components/VueFlowRender";
 const formBuillder = ref();
 const handleChangeSchemas = () => {
   formBuillder.value?.setSchema([

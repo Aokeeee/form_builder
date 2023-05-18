@@ -1,5 +1,5 @@
 {
-  "name": "form_builder",
+  "name": "process_admin",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -9,6 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vue-flow/background": "^1.2.0",
+    "@vue-flow/controls": "^1.0.6",
+    "@vue-flow/core": "^1.20.0",
+    "@vue-flow/minimap": "^1.1.1",
     "less": "^4.1.3",
     "naive-ui": "^2.34.3",
     "unplugin-vue-components": "^0.24.1",

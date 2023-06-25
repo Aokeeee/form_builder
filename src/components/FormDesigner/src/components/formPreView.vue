@@ -1,246 +1,161 @@
 <template>
-  <n-modal
-    preset="dialog"
-    size="small"
-    :bordered="false"
-    v-model:show="show"
-    :show-icon="false"
-    :mask-closable="false"
-    :title="getFormPorps.title"
-    style="width: auto"
-  >
-    <n-scrollbar style="max-height: 500px">
-      <n-form
-        v-bind="getFormPorps"
-        :model="formModel"
-        :style="{
-          width: getFormPorps.width + 'px',
-        }"
-        ref="formRef"
-      >
-        <template v-for="item in getFormList" :key="item.key">
-          <n-grid
-            v-bind="item.componentProps"
-            v-if="item.component === 'NGrid'"
-          >
-            <n-gi
-              v-for="(gi, index) in item.columns"
-              :span="gi.span"
-              :key="`${item.key}-${index}`"
-            >
-              <n-form-item
-                v-for="formItem in gi.list"
-                :key="formItem.key"
-                :label="formItem.label"
-                :path="formItem.field"
-              >
-                <n-radio-group
-                  v-if="formItem.component === 'NRadio'"
-                  v-bind="formItem.componentProps"
-                  v-model:value="formModel[formItem.field]"
-                >
-                  <n-radio
-                    v-for="option in formItem.componentProps.options"
-                    :key="option.value"
-                    :value="option.value"
-                    :label="option.label"
-                  />
-                </n-radio-group>
-
-                <n-checkbox-group
-                  v-else-if="formItem.component === 'NCheckBox'"
-                  v-bind="formItem.componentProps"
-                  v-model:value="formModel[formItem.field]"
-                >
-                  <n-checkbox
-                    v-for="option in formItem.componentProps.options"
-                    :key="option.value"
-                    :value="option.value"
-                    :label="option.label"
-                  />
-                </n-checkbox-group>
-
-                <component
-                  v-else
-                  :is="formItem.component"
-                  v-bind="formItem.componentProps"
-                  v-model:value="formModel[formItem.field]"
-                />
-              </n-form-item>
-            </n-gi>
-          </n-grid>
-          <n-form-item
-            v-else
-            :span="item.span"
-            :label="item.label"
-            :path="item.field"
-          >
-            <n-radio-group
-              v-if="item.component === 'NRadio'"
-              v-bind="item.componentProps"
-              v-model:value="formModel[item.field]"
-            >
-              <n-radio
-                v-for="option in item.componentProps.options"
-                :key="option.value"
-                :value="option.value"
-                :label="option.label"
-              />
-            </n-radio-group>
-
-            <n-checkbox-group
-              v-else-if="item.component === 'NCheckBox'"
-              v-bind="item.componentProps"
-              v-model:value="formModel[item.field]"
-            >
-              <n-checkbox
-                v-for="option in item.componentProps.options"
-                :key="option.value"
-                :value="option.value"
-                :label="option.label"
-              />
-            </n-checkbox-group>
-
-            <component
-              v-else
-              :is="item.component"
-              v-bind="item.componentProps"
-              v-model:value="formModel[item.field]"
-            />
-          </n-form-item>
-        </template>
-      </n-form>
-    </n-scrollbar>
-    <template #action>
-      <n-space>
-        <n-button secondary @click="show = false">关闭</n-button>
-        <n-button secondary type="warning" @click="handleDisable(true)">
-          禁用编辑
-        </n-button>
-        <n-button secondary type="success" @click="handleDisable(false)">
-          取消禁用
-        </n-button>
-        <n-button type="primary" @click="handleSubmit">获取数据</n-button>
-      </n-space>
-    </template>
+  <n-modal v-model:show="show" :auto-focus="false" aria-modal="true">
+    <n-el class="modal-container">
+      <div class="header">
+        <div class="title"> {{ formProps.title }} </div>
+        <n-icon
+          :component="CloseOutlined"
+          class="cursor-pointer"
+          color="var(--close-icon-color)"
+          @click="show = false"
+        />
+      </div>
+      <div class="content">
+        <div class="content-container">
+          <n-card :bordered="false" :content-style="{ padding: '10px' }">
+            <GenerateForm :list="list" :form-props="formProps" :edit="true" ref="formRef" />
+          </n-card>
+        </div>
+      </div>
+      <div class="footer">
+        <n-space justify="end">
+          <n-button secondary @click="show = false">关闭</n-button>
+          <n-button secondary type="warning" @click="handleDisable(true)"> 禁用编辑 </n-button>
+          <n-button secondary type="success" @click="handleDisable(false)"> 取消禁用 </n-button>
+          <n-button type="primary" @click="handleSubmit('sbumit')"> 获取数据 </n-button>
+        </n-space>
+      </div>
+    </n-el>
   </n-modal>
 </template>
 
 <script lang="ts" setup>
-import { computed, PropType, ref, reactive, unref } from "vue";
-import { FormItems, GenFormProps } from "../types";
-import { genFormComponentTriggerData } from "../utils/helper";
+  import { computed, PropType, ref, reactive, nextTick, watchEffect } from 'vue';
+  import { FormItems, GenFormProps } from '../types';
+  import { http } from '@/utils/http/axios';
+  import GenerateForm from './GenerateForm.vue';
+  import { CloseOutlined } from '@vicons/antd';
 
-type Recordable<T = any> = Record<string, T>;
-
-const formRef = ref();
-const props = defineProps({
-  list: {
-    type: Array as PropType<FormItems[]>,
-    required: true,
-  },
-  formProps: {
-    type: Object as PropType<GenFormProps>,
-    required: true,
-  },
-});
-
-const show = ref(false);
-const formModel = reactive<Recordable>({});
-const formRules = reactive<Recordable>({});
-
-const getFormPorps = computed(() => {
-  return {
-    ...props.formProps,
-    rules: {
-      ...formRules,
+  const formRef = ref<InstanceType<typeof GenerateForm> | null>(null);
+  const props = defineProps({
+    list: {
+      type: Array as PropType<FormItems[]>,
+      required: true,
     },
-  };
-});
+    formProps: {
+      type: Object as PropType<Partial<GenFormProps>>,
+      required: true,
+    },
+  });
 
-const getFormList = computed(() => props.list ?? {});
+  const requestData = ref<Recordable>({});
 
-/**
- * @description 初始化表单默认值和校验规则
- */
-const initFormValues = () => {
-  const schemas = unref(props.list);
-  schemas.forEach((item) => {
-    if (item.component != "NGrid") {
-      const { value, required, message } = item.componentProps;
-      formModel[item.field] = value;
-      if (required && required === true) {
-        formRules[item.field] = {
-          required: required,
-          message: message,
-          ...genFormComponentTriggerData(item.component, item.componentProps),
-        };
-      }
-    } else {
-      const { columns } = item;
-      if (columns && columns.length) {
-        columns.forEach((parent) => {
-          parent.list.forEach((child) => {
-            const { value, required, message } = child.componentProps;
-            formModel[child.field] = value;
-            if (required && required === true) {
-              formRules[child.field] = {
-                required: required,
-                message: message,
-                ...genFormComponentTriggerData(
-                  child.component,
-                  child.componentProps
-                ),
-              };
-            }
+  const show = ref(false);
+  const loading = ref(false);
+
+  /**
+   * @description 处理请求数据源
+   */
+
+  const handleRequest = async () => {
+    const { dataList } = props.formProps;
+    if (!dataList) return;
+    if (dataList.length) {
+      for (const item of dataList) {
+        const { requestUrl, requestParams, requestMethod, dataField } = item;
+        try {
+          const data = await http.request({
+            url: requestUrl,
+            method: requestMethod.toUpperCase(),
+            ...(requestMethod === 'Get'
+              ? { params: JSON.parse(requestParams) }
+              : { data: JSON.parse(requestParams) }),
           });
-        });
+          requestData.value[dataField] = data;
+        } catch (error) {
+          requestData.value = {};
+          console.error(`Error making request to ${requestUrl}: ${error}`);
+        }
       }
     }
-  });
-  console.log(getFormPorps.value);
-};
+    console.log(requestData.value);
+  };
 
-const handleDisable = (val: boolean) => {
-  const schemas = unref(props.list);
-  schemas.length &&
-    schemas.forEach((item) => {
-      if (item.component === "NGrid") {
-        if (item.columns && item.columns.length)
-          item.columns.forEach((parent) => {
-            if (parent.list && parent.list.length) {
-              parent.list.forEach((child) => {
-                child.componentProps.disabled = val;
-              });
-            }
-          });
+  const openModal = () => {
+    show.value = true;
+    nextTick(() => {
+      formRef.value?.manualInit();
+    });
+  };
+
+  const handleDisable = (val: boolean) => {
+    formRef.value?.handleDisable(val);
+  };
+
+  const handleSubmit = (val) => {
+    formRef.value?.formRef?.validate((errors) => {
+      if (!errors) {
+        console.info(formRef.value?.formModel);
       } else {
-        item.componentProps.disabled = val;
+        console.error(errors);
       }
     });
-};
+  };
 
-const openModal = () => {
-  initFormValues();
-  show.value = true;
-};
-
-const handleSubmit = (e: Event) => {
-  e.preventDefault();
-  formRef.value?.validate((errors) => {
-    if (!errors) {
-      console.info(formModel);
-    } else {
-      console.error(errors);
-    }
+  // 使用 watchEffect 监听 props 参数的变化
+  watchEffect(() => {
+    // const { dataList } = unref(getFormPorps);
+    // if (props.load && dataList?.length) {
+    //   handleRequest();
+    // }
   });
-};
 
-defineExpose({ show, openModal });
+  defineExpose({ show, loading, openModal });
 </script>
 
 <style lang="less" scoped>
-.n-form {
-  padding: 0 15px;
-}
+  .modal-container {
+    width: auto;
+
+    max-height: 90vh;
+    box-sizing: border-box;
+    background-color: var(--base-color);
+    border-radius: var(--border-radius);
+    display: flex;
+
+    flex-direction: column;
+    .header {
+      width: 100%;
+      height: 45px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      font-size: 18px;
+      font-weight: 500;
+      position: relative;
+      z-index: 999;
+      box-shadow: 0 3px 2px -2px rgba(0, 0, 0, 0.1);
+    }
+    .content {
+      flex: 1;
+      width: 100%;
+      padding: 10px 10px 0;
+      max-height: calc(90vh - 117px);
+      &-container {
+        width: 100%;
+        max-height: calc(90vh - 127px);
+        padding: 0 10px 0 15px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+      }
+    }
+    .footer {
+      width: 100%;
+      flex-shrink: 0;
+      padding: 12px 24px 12px 10px;
+    }
+  }
 </style>

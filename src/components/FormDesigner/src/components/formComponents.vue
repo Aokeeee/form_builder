@@ -1,12 +1,7 @@
 <template>
   <n-layout-sider bordered class="components-wrapper">
     <n-layout-header class="components-toolbar">
-      <n-tabs
-        type="line"
-        animated
-        justify-content="space-around"
-        v-model:value="tabsVal"
-      >
+      <n-tabs type="line" animated justify-content="space-around" v-model:value="tabsVal">
         <n-tab name="components">
           <SvgIcon name="components" />
           组件库
@@ -27,12 +22,7 @@
       <n-collapse
         v-if="tabsVal === 'components'"
         arrow-placement="right"
-        :default-expanded-names="[
-          'BasicField',
-          'ContainerField',
-          'AdvancedField',
-          'CustomField',
-        ]"
+        :default-expanded-names="['BasicField', 'ContainerField', 'AdvancedField', 'CustomField']"
       >
         <n-collapse-item
           v-for="(item, index) in formItemsData"
@@ -53,7 +43,7 @@
             "
           >
             <template #item="{ element }">
-              <n-button :class="element.icon">
+              <n-button :class="`${element.icon}-com`">
                 <template #icon>
                   <SvgIcon :name="element.icon" />
                 </template>
@@ -72,50 +62,50 @@
 </template>
 
 <script lang="ts">
-import { FormData } from "../types";
-import { SvgIcon } from "@/components/SvgIcon";
-import { PropType, defineComponent, ref } from "vue";
-import Draggable from "vuedraggable/src/vuedraggable";
-import { formItemsData } from "../utils/data";
-export default defineComponent({
-  name: "formComponents",
-  props: {
-    comlist: Array as PropType<FormData[]>,
-    templist: Array,
-  },
-  components: { SvgIcon, Draggable },
-  setup(props, { emit }) {
-    const tabsVal = ref("components");
-    return {
-      tabsVal,
-      formItemsData,
-    };
-  },
-});
+  import { FormData } from '../types';
+  import { SvgIcon } from '@/components/SvgIcon';
+  import { PropType, defineComponent, ref } from 'vue';
+  import Draggable from 'vuedraggable/src/vuedraggable';
+  import { formItemsData } from '../utils/data';
+  export default defineComponent({
+    name: 'formComponents',
+    props: {
+      comlist: Array as PropType<FormData[]>,
+      templist: Array,
+    },
+    components: { SvgIcon, Draggable },
+    setup(props, { emit }) {
+      const tabsVal = ref('components');
+      return {
+        tabsVal,
+        formItemsData,
+      };
+    },
+  });
 </script>
 
 <style lang="less" scoped>
-.components-content {
-  height: calc(100% - 42px);
-  :deep(.n-collapse) {
-    .n-collapse-item__header-main {
-      justify-content: space-between;
+  .components-content {
+    height: calc(100% - 42px);
+    :deep(.n-collapse) {
+      .n-collapse-item__header-main {
+        justify-content: space-between;
 
-      font-weight: bold !important;
-    }
-    .n-collapse-item__content-inner {
-      padding: 16px 6px 0;
+        font-weight: bold !important;
+      }
+      .n-collapse-item__content-inner {
+        padding: 16px 6px 0;
+      }
     }
   }
-}
-.components-toolbar {
-  .svg-icon {
-    font-size: 17px;
-    margin-right: 5px;
+  .components-toolbar {
+    .svg-icon {
+      font-size: 17px;
+      margin-right: 5px;
+    }
   }
-}
-.n-button {
-  justify-content: start;
-  font-size: 13px;
-}
+  .n-button {
+    justify-content: start;
+    font-size: 13px;
+  }
 </style>

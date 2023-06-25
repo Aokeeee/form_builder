@@ -1,18 +1,20 @@
-import type { FormProps } from "naive-ui";
+import type { FormProps } from 'naive-ui';
 
 export type FormComponent =
-  | "NInput"
-  | "NSelect"
-  | "NCheckBox"
-  | "NInputNumber"
-  | "NSwitch"
-  | "NRadio"
-  | "NRate"
-  | "NSlider"
-  | "NTimePicker"
-  | "NDatePicker"
-  | "NGrid"
-  | "NTransfer";
+  | 'NInput'
+  | 'NSelect'
+  | 'NCheckBox'
+  | 'NInputNumber'
+  | 'NSwitch'
+  | 'NRadio'
+  | 'NRate'
+  | 'NSlider'
+  | 'NTimePicker'
+  | 'NDatePicker'
+  | 'NGrid'
+  | 'NTransfer'
+  | 'EmployeeSelector'
+  | 'UpLoad';
 
 export interface FormItems {
   label: string;
@@ -35,4 +37,12 @@ export interface FormComponentPorps {
 export interface GenFormProps extends FormProps {
   title: string;
   width: number;
+  dataList: DataList[];
 }
+
+export type DataList = {
+  requestMethod: 'Post' | 'Get';
+  requestUrl: string;
+  requestParams: any;
+  dataField: string;
+};

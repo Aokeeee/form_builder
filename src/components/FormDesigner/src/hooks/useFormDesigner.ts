@@ -1,21 +1,23 @@
-import { ref, reactive, toRefs, Ref } from "vue";
-import { v4 } from "uuid";
-import { FormItems, GenFormProps } from "../types";
-import { genFormComponentPorps } from "../utils/helper";
+import { ref, reactive, toRefs } from 'vue';
+import { v4 } from 'uuid';
+import { FormItems, GenFormProps } from '../types';
+import { genFormComponentPorps } from '../utils/helper';
 export function useFormDesigner() {
   const schema = ref<FormItems[]>([]);
   const currentData = ref<FormItems | undefined>(undefined);
-  const formProps = reactive<GenFormProps>({
-    title: "默认标题",
+
+  const formProps = ref<GenFormProps>({
+    title: '默认标题',
     width: 600,
-    size: "medium",
-    labelPlacement: "left",
-    labelAlign: "center",
+    size: 'medium',
+    labelPlacement: 'left',
+    labelAlign: 'center',
     labelWidth: 85,
+    dataList: [],
   });
   const handleAdd = (e: { newIndex: number; item: any }) => {
     const { newIndex } = e;
-    const key = v4().replaceAll("-", "");
+    const key = v4().replaceAll('-', '');
     //每次拖拽给当前组件数据赋唯一key、id
     schema.value[newIndex] = {
       ...schema.value[newIndex],
@@ -26,7 +28,7 @@ export function useFormDesigner() {
       },
       //处理栅格布局
       columns:
-        schema.value[newIndex].component === "NGrid"
+        schema.value[newIndex].component === 'NGrid'
           ? [
               {
                 span: 12,
@@ -42,24 +44,19 @@ export function useFormDesigner() {
 
     currentData.value = schema.value[newIndex];
 
-    console.log("当前行数据====>", schema.value[newIndex]);
+    console.log('当前行数据====>', schema.value[newIndex]);
   };
 
-  const handleGiAdd = (
-    event: any,
-    row: any,
-    index: string | number | symbol
-  ) => {
+  const handleGiAdd = (event: any, row: any, index: string | number | symbol) => {
     const { newIndex, oldIndex, item } = event;
     // 不允许栅格嵌套栅格
-    if (item.className.includes("grid")) {
-      item.tagName === "BUTTON" && row.columns[index].list.splice(newIndex, 1);
-      console.info(
-        `%c不允许栅格嵌套栅格 `,
-        "color:#ab1f3f;font-size: 16px;font-weight:bolder"
-      );
+    console.log(event);
+
+    if (item.className.includes('grid-com')) {
+      item.tagName === 'BUTTON' && row.columns[index].list.splice(newIndex, 1);
+      console.info(`%c不允许栅格嵌套栅格 `, 'color:#ab1f3f;font-size: 16px;font-weight:bolder');
     } else {
-      const key = v4().replaceAll("-", "");
+      const key = v4().replaceAll('-', '');
       row.columns[index].list[newIndex] = {
         ...row.columns[index].list[newIndex],
         key,
@@ -69,7 +66,7 @@ export function useFormDesigner() {
         },
       };
       currentData.value = row.columns[index].list[newIndex];
-      console.log("栅格数据====>", row.columns[index]);
+      console.log('栅格数据====>', row.columns[index]);
     }
   };
 
@@ -91,7 +88,7 @@ export function useFormDesigner() {
   };
 
   const handleItemCopy = (index: number, list?: FormItems[]) => {
-    const key = v4().replaceAll("-", "");
+    const key = v4().replaceAll('-', '');
     const arr = list && list.length ? list : schema.value;
     const copyData: FormItems = {
       ...arr[index],
@@ -102,7 +99,7 @@ export function useFormDesigner() {
       },
       //处理栅格布局
       columns:
-        arr[index].component === "NGrid"
+        arr[index].component === 'NGrid'
           ? [
               {
                 span: 12,
@@ -124,9 +121,18 @@ export function useFormDesigner() {
     currentData.value = undefined;
   };
 
+  const setFormData = (formList: FormItems[], formConfig: GenFormProps) => {
+    schema.value = formList;
+    console.log(formList, formConfig);
+
+    currentData.value = schema.value[0];
+    formProps.value = formConfig;
+  };
+
   return {
     schema,
     formProps,
+    setFormData,
     handleAdd,
     handleGiAdd,
     handleClear,

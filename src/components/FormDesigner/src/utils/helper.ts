@@ -1,26 +1,24 @@
-import { FormComponent, FormItems } from "../types";
+import { FormComponent, FormItems } from '../types';
 
 export const genFormComponentPorps = (form: FormItems) => {
   const { component: formComponent, icon: formComponentType } = form;
   let componentProps = {};
   const entryComponentProps = {
-    value: "",
+    value: '',
     clearable: true,
   };
 
-  if (formComponentType === "textarea") {
+  if (formComponentType === 'textarea') {
     componentProps = {
       ...entryComponentProps,
-      type: "textarea",
+      type: 'textarea',
       autosize: false,
       rows: 3,
       maxlength: undefined,
       minlength: undefined,
       showCount: false,
     };
-  }
-
-  if (["checkbox", "radio", "select"].includes(formComponentType)) {
+  } else if (['checkbox', 'radio', 'select'].includes(formComponentType)) {
     componentProps = {
       options: [
         {
@@ -42,35 +40,62 @@ export const genFormComponentPorps = (form: FormItems) => {
       ...entryComponentProps,
       value: null,
     };
-    if (formComponentType === "select") {
+    if (formComponentType === 'select') {
       componentProps = {
         ...componentProps,
         multiple: false,
-        labelField: "label",
-        valueField: "value",
-        customRemoteAddress: "",
+        labelField: 'label',
+        valueField: 'value',
+        customRemoteAddress: '',
       };
     }
   }
 
-  if (formComponent === "NGrid") {
+  if (formComponent === 'NGrid') {
     componentProps = {
       cols: 24,
       xGap: 12,
       yGap: 12,
     };
+  } else if (formComponent === 'EmployeeSelector') {
+    componentProps = {
+      ...componentProps,
+      required: false,
+      message: '',
+      preload: true,
+      selectProps: {
+        disabled: false,
+        multiple: false,
+        clearable: true,
+      },
+    };
+  } else if (formComponent === 'UpLoad') {
+    componentProps = {
+      ...componentProps,
+      value: [],
+      multiple: false,
+    };
+  } else if (formComponent === 'NDatePicker') {
+    componentProps = {
+      ...componentProps,
+      type: 'date',
+      valueFormat: 'yyyy-MM-dd',
+      required: false,
+      message: '',
+      disabled: false,
+      formattedValue: null,
+    };
   } else {
     componentProps = {
       ...componentProps,
       required: false,
-      message: "",
+      message: '',
       disabled: false,
     };
   }
 
   return componentProps;
 };
-type Recordable<T = any> = Record<string, T>;
 
 export const genFormComponentTriggerData = (
   component: FormComponent,
@@ -79,47 +104,45 @@ export const genFormComponentTriggerData = (
   let obj = {};
 
   //输入框
-  if (component === "NInput") {
+  if (component === 'NInput') {
     obj = {
-      trigger: ["blur", "input"],
+      trigger: ['blur', 'input'],
     };
     //选择数字类型
-  } else if (
-    ["NDatePicker", "NTimePicker", "NInputNumber"].includes(component)
-  ) {
+  } else if (['NDatePicker', 'NTimePicker', 'NInputNumber'].includes(component)) {
     obj = {
-      type: "number",
-      trigger: ["blur", "change"],
+      type: 'number',
+      trigger: ['blur', 'change'],
     };
     //多选项 单选项
   } else {
     obj = {
-      trigger: "change",
+      trigger: 'change',
     };
     switch (component) {
       //穿梭框
-      case "NTransfer":
+      case 'NTransfer':
         obj = {
-          type: "array",
-          trigger: "change",
+          type: 'array',
+          trigger: 'change',
         };
         break;
       //Slider,
-      case "NSlider":
+      case 'NSlider':
         obj = {
-          trigger: ["blur", "change"],
+          trigger: ['blur', 'change'],
         };
         break;
       //Select,
-      case "NSelect":
+      case 'NSelect':
         obj = {
-          trigger: ["blur", "change"],
+          trigger: ['blur', 'change'],
         };
         break;
-      case "NCheckBox":
+      case 'NCheckBox':
         obj = {
-          type: "array",
-          trigger: "change",
+          type: 'array',
+          trigger: 'change',
         };
         break;
 
@@ -129,10 +152,13 @@ export const genFormComponentTriggerData = (
   }
 
   //特殊处理下拉框
-  if (component === "NSelect" && componentProps.multiple === true) {
+  if (
+    (component === 'NSelect' && componentProps.multiple === true) ||
+    (component === 'EmployeeSelector' && componentProps.selectProps.multiple === true)
+  ) {
     obj = {
-      type: "array",
-      trigger: ["blur", "change"],
+      type: 'array',
+      trigger: ['blur', 'change'],
     };
   }
 

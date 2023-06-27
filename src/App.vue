@@ -1,44 +1,24 @@
 <template>
-  <NConfigProvider :theme-overrides="themeOverrides">
-    <!-- <FormDesigner ref="formBuillder" />
-
-    <n-button
-      @click="handleChangeSchemas"
-      type="primary"
-      style="position: fixed; bottom: 20px; right: 20px; z-index: 99999999"
-    >
-      click
-    </n-button> -->
-    <VueFlowRender />
+  <NConfigProvider :theme-overrides="themeOverrides" :locale="zhCN">
+    <AppProvider> <router-view /> </AppProvider>
   </NConfigProvider>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import { NConfigProvider, darkTheme } from "naive-ui";
-import { FormDesigner } from "@/components/FormDesigner";
-import { VueFlowRender } from "@/components/VueFlowRender";
-const formBuillder = ref();
-const handleChangeSchemas = () => {
-  formBuillder.value?.setSchema([
-    {
-      icon: "date",
-      label: "日期选择器",
-      component: "NDatePicker",
-      key: "47aa0bb48ae6423fbd01b6e134dc35e7",
-      field: "date_47aa0bb48ae6423fbd01b6e134dc35e7",
-      componentProps: {
-        required: false,
-        message: "",
-        disabled: false,
-      },
-      columns: null,
-    },
-  ]);
-};
+import { NConfigProvider, zhCN } from "naive-ui";
+import { appTheme } from "@/setting/theme";
+import { lighten } from "@/utils";
+import { AppProvider } from "@/components/Application";
+const lightenStr = lighten(appTheme, 6);
 const themeOverrides = {
-  Tooltip: {
-    padding: "2px 4px",
+  common: {
+    primaryColor: appTheme,
+    primaryColorHover: lightenStr,
+    primaryColorPressed: lightenStr,
+    primaryColorSuppl: appTheme,
+  },
+  LoadingBar: {
+    colorLoading: appTheme,
   },
 };
 </script>
